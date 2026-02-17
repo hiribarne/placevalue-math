@@ -1,0 +1,992 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<title>Place Value Subtraction</title>
+<style>
+:root {
+  --unit-size: 28px;
+  --rod-width: 28px;
+  --rod-height: 140px;
+  --flat-size: 140px;
+  --color-unit: #4A90D9;
+  --color-rod: #7BC67E;
+  --color-flat: #F5A623;
+  --color-bg: #F7F3EE;
+  --color-header: #5B4A8A;
+  --color-accent: #E8573A;
+  --color-success: #4CAF50;
+  --color-text: #333;
+  --color-light-text: #777;
+  --color-border: #ccc;
+  --color-mat-bg: #FAFAF5;
+  --color-mat-header: #EDE8E0;
+  --color-galera-bg: #fff;
+  --radius: 4px;
+  --shadow-block: 1px 2px 4px rgba(0,0,0,0.18);
+}
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  background: var(--color-bg);
+  color: var(--color-text);
+  min-height: 100vh;
+  -webkit-tap-highlight-color: transparent;
+  -webkit-text-size-adjust: 100%;
+  overflow-x: hidden;
+}
+
+/* ── Header ── */
+.header {
+  background: var(--color-header);
+  color: #fff;
+  padding: 12px 20px;
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+.header h1 { font-size: 1.3rem; font-weight: 700; margin-right: auto; }
+.header select, .header button {
+  font-size: 0.95rem; padding: 8px 14px; border: none;
+  border-radius: 6px; cursor: pointer; min-height: 44px;
+}
+.header select {
+  background: rgba(255,255,255,0.2); color: #fff;
+  appearance: none; -webkit-appearance: none; padding-right: 28px;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='white' stroke-width='2' fill='none'/%3E%3C/svg%3E");
+  background-repeat: no-repeat; background-position: right 10px center;
+}
+.header select option { color: #333; background: #fff; }
+.btn-new { background: var(--color-accent); color: #fff; font-weight: 600; }
+.btn-new:active { transform: scale(0.96); }
+.btn-home {
+  background: rgba(255,255,255,0.2); color: #fff; font-weight: 600;
+  text-decoration: none; display: inline-flex; align-items: center; gap: 4px;
+  font-size: 0.95rem; padding: 8px 14px; border-radius: 6px; min-height: 44px;
+}
+.btn-home:active { transform: scale(0.96); }
+
+/* ── Main Layout ── */
+.main {
+  display: flex; gap: 24px; padding: 20px;
+  max-width: 1200px; margin: 0 auto; align-items: flex-start;
+}
+
+/* ── Galera Section ── */
+.galera-section {
+  flex: 1; display: flex; flex-direction: column; align-items: center; gap: 16px;
+}
+.galera {
+  background: var(--color-galera-bg); border: 2px solid var(--color-border);
+  border-radius: 10px; padding: 20px; display: inline-block;
+}
+.galera-row { display: flex; align-items: center; gap: 4px; margin-bottom: 4px; }
+.galera-row.carry-row { margin-bottom: 2px; }
+.galera-row.divider {
+  border-bottom: 3px solid var(--color-text); padding-bottom: 6px; margin-bottom: 6px;
+}
+.galera-label {
+  width: 24px; text-align: center; font-size: 1.3rem;
+  font-weight: 700; color: var(--color-light-text);
+}
+.galera-cell {
+  width: 56px; height: 56px; border: 2px solid var(--color-border);
+  border-radius: 6px; text-align: center; font-size: 1.7rem; font-weight: 700;
+  font-family: 'Courier New', monospace; background: #fff;
+  color: var(--color-text); outline: none;
+  -webkit-appearance: none; appearance: none;
+}
+.galera-cell:focus {
+  border-color: var(--color-header); box-shadow: 0 0 0 3px rgba(91,74,138,0.2);
+}
+.galera-cell.readonly { background: #f5f5f5; cursor: default; }
+.galera-carry-slot { width: 56px; display: flex; justify-content: center; }
+.galera-cell.carry {
+  width: 36px; height: 36px; font-size: 1.1rem; font-weight: 700;
+  border: 2px solid #d4b896; color: var(--color-accent); background: #FFF8F0;
+}
+.galera-cell.carry:focus {
+  border-color: var(--color-accent); box-shadow: 0 0 0 3px rgba(232,87,58,0.15);
+}
+.galera-cell.correct { border-color: var(--color-success); background: #F0FFF0; }
+.galera-cell.incorrect {
+  border-color: var(--color-accent); background: #FFF0F0; animation: shake 0.4s ease;
+}
+@keyframes shake {
+  0%, 100% { transform: translateX(0); }
+  25% { transform: translateX(-4px); }
+  75% { transform: translateX(4px); }
+}
+.galera-col-header {
+  text-align: center; font-size: 0.7rem; color: var(--color-light-text); width: 56px;
+}
+
+/* Check button */
+.btn-check {
+  background: var(--color-success); color: #fff; padding: 14px 36px;
+  font-size: 1.15rem; font-weight: 700; border: none; border-radius: 10px;
+  cursor: pointer; min-height: 48px; width: 100%; max-width: 280px;
+  transition: transform 0.15s ease;
+}
+.btn-check:active { transform: scale(0.96); }
+.btn-check:disabled { opacity: 0.4; cursor: not-allowed; }
+
+/* ── Mat Section (collapsible) ── */
+.mat-section { display: flex; flex-direction: column; gap: 0; flex: 0.85; }
+.mat-toggle {
+  display: flex; align-items: center; justify-content: center; gap: 8px;
+  background: var(--color-mat-header); border: 2px solid #c4b89a;
+  border-radius: 10px 10px 0 0; padding: 10px 16px; cursor: pointer;
+  font-size: 0.85rem; font-weight: 700; color: var(--color-text);
+  user-select: none; -webkit-user-select: none;
+}
+.mat-toggle .arrow {
+  display: inline-block; transition: transform 0.25s ease; font-size: 0.7rem;
+}
+.mat-section.collapsed .mat-toggle { border-radius: 10px; }
+.mat-section.collapsed .arrow { transform: rotate(-90deg); }
+.mat-body {
+  overflow: hidden; transition: max-height 0.35s ease, opacity 0.25s ease;
+  max-height: 2000px; opacity: 1;
+}
+.mat-section.collapsed .mat-body { max-height: 0; opacity: 0; }
+
+.mat {
+  display: grid; grid-template-columns: 1fr 1fr 1fr;
+  border: 2px solid #c4b89a; border-top: none;
+  overflow: hidden; background: var(--color-mat-bg);
+}
+.mat-header {
+  background: var(--color-mat-header); padding: 6px 4px;
+  text-align: center; font-weight: 700; font-size: 0.8rem;
+  border-bottom: 2px solid #c4b89a;
+}
+.mat-header small { display: block; font-weight: 400; font-size: 0.7rem; color: var(--color-light-text); }
+.mat-cell {
+  border: 1px solid #e0dbd2; padding: 6px; min-height: 60px;
+  display: flex; flex-wrap: wrap; align-content: flex-start;
+  gap: 3px; position: relative;
+}
+.mat-cell.hundreds-col { background: rgba(245,166,35,0.05); }
+.mat-cell.tens-col     { background: rgba(123,198,126,0.05); }
+.mat-cell.ones-col     { background: rgba(74,144,217,0.05); }
+.mat-row-label {
+  position: absolute; top: 2px; left: 4px;
+  font-size: 0.6rem; color: var(--color-light-text); pointer-events: none;
+}
+.mat-cell.row-subtrahend { border-top: 2px solid #c4b89a; }
+.mat-cell.row-result     { border-top: 3px solid #c4b89a; }
+
+/* ── Counter bar ── */
+.count-bar {
+  display: grid; grid-template-columns: 1fr 1fr 1fr;
+  border: 2px solid #c4b89a; border-top: 2px dashed #c4b89a;
+  background: #f0ede6;
+}
+.count-cell {
+  padding: 6px 4px; text-align: center; font-size: 0.8rem;
+  font-weight: 700; color: var(--color-light-text);
+  border-right: 1px solid #e0dbd2;
+}
+.count-cell:last-child { border-right: none; }
+.count-cell .count-num {
+  font-size: 1.2rem; color: var(--color-text); display: block; line-height: 1;
+}
+.count-total {
+  grid-column: 1 / -1; text-align: center; padding: 5px 4px;
+  font-size: 0.8rem; color: var(--color-light-text);
+  border-top: 1px solid #d5d0c7;
+}
+.count-total .count-formed {
+  font-size: 1.1rem; font-weight: 800; color: var(--color-header);
+  margin-left: 4px; font-family: 'Courier New', monospace;
+}
+
+/* Mat actions + bottom border */
+.mat-actions-wrap {
+  border: 2px solid #c4b89a; border-top: none;
+  border-radius: 0 0 10px 10px; background: var(--color-mat-bg);
+  padding: 10px; display: flex; gap: 8px; justify-content: center;
+}
+
+/* ── Blocks ── */
+.block {
+  border-radius: var(--radius); box-shadow: var(--shadow-block);
+  flex-shrink: 0; cursor: pointer; position: relative;
+}
+.block.unit {
+  width: var(--unit-size); height: var(--unit-size);
+  background: var(--color-unit); border: 1px solid #3a7bc0;
+}
+.block.rod {
+  width: var(--rod-width); height: var(--rod-height);
+  background: var(--color-rod); border: 1px solid #5ea862;
+  background-image: repeating-linear-gradient(
+    to bottom, transparent, transparent 13px,
+    rgba(0,0,0,0.12) 13px, rgba(0,0,0,0.12) 14px
+  );
+}
+.block.flat {
+  width: var(--flat-size); height: var(--flat-size);
+  background: var(--color-flat); border: 1px solid #d4901c;
+  background-image:
+    repeating-linear-gradient(to bottom, transparent, transparent 13px,
+      rgba(0,0,0,0.10) 13px, rgba(0,0,0,0.10) 14px),
+    repeating-linear-gradient(to right, transparent, transparent 13px,
+      rgba(0,0,0,0.10) 13px, rgba(0,0,0,0.10) 14px);
+}
+
+/* Block counting */
+.block.counted { opacity: 0.45; }
+.block.counted::after {
+  content: '\2713'; position: absolute; inset: 0;
+  display: flex; align-items: center; justify-content: center;
+  color: #fff; font-weight: 900; font-size: 1em;
+  text-shadow: 0 1px 3px rgba(0,0,0,0.6); pointer-events: none;
+}
+.block.unit.counted::after { font-size: 0.85em; }
+.block.rod.counted::after  { font-size: 1.4em; }
+.block.flat.counted::after { font-size: 3em; }
+
+/* Block animations — ORDER MATTERS (later wins) */
+.block.entrance { animation: blockEntrance 0.35s ease-out forwards; }
+@keyframes blockEntrance {
+  from { transform: scale(0); opacity: 0; } to { transform: scale(1); opacity: 1; }
+}
+.block.slide-down { animation: slideDown 0.5s ease forwards; }
+@keyframes slideDown {
+  from { transform: translateY(-40px); opacity: 0.5; } to { transform: translateY(0); opacity: 1; }
+}
+.block.highlight { animation: blockHighlight 0.6s ease infinite; }
+@keyframes blockHighlight {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(232,87,58,0.4); }
+  50%      { box-shadow: 0 0 0 6px rgba(232,87,58,0.15); }
+}
+.block.shrink-away { animation: shrinkAway 0.4s ease forwards; }
+@keyframes shrinkAway { to { transform: scale(0); opacity: 0; } }
+.block.pop-in { animation: popIn 0.4s cubic-bezier(0.34,1.56,0.64,1) forwards; }
+@keyframes popIn {
+  from { transform: scale(0); opacity: 0; } to { transform: scale(1); opacity: 1; }
+}
+
+/* ── Mat buttons ── */
+.btn {
+  padding: 10px 20px; font-size: 1rem; font-weight: 700; border: none;
+  border-radius: 8px; cursor: pointer; min-height: 44px;
+  transition: transform 0.15s ease;
+}
+.btn:active { transform: scale(0.96); }
+.btn:disabled { opacity: 0.35; cursor: not-allowed; transform: none; }
+.btn-subtract { background: var(--color-header); color: #fff; }
+.btn-borrow { background: var(--color-accent); color: #fff; display: none; }
+.btn-borrow.show {
+  display: inline-block;
+  animation: borrowBtnPulse 0.8s ease infinite;
+}
+@keyframes borrowBtnPulse {
+  0%, 100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(232,87,58,0.6); }
+  50%      { transform: scale(1.06); box-shadow: 0 0 0 12px rgba(232,87,58,0); }
+}
+
+/* ── BORROW NEEDED — very noticeable ── */
+.mat-cell.needs-borrow {
+  animation: borrowFlash 0.7s ease infinite;
+  border: 3px solid var(--color-accent);
+  z-index: 1;
+}
+@keyframes borrowFlash {
+  0%, 100% {
+    background: rgba(232,87,58,0.08);
+    box-shadow: inset 0 0 12px rgba(232,87,58,0.15), 0 0 0 0 rgba(232,87,58,0.3);
+  }
+  50% {
+    background: rgba(232,87,58,0.22);
+    box-shadow: inset 0 0 20px rgba(232,87,58,0.25), 0 0 0 8px rgba(232,87,58,0.08);
+  }
+}
+.borrow-badge {
+  position: absolute; top: -10px; right: -10px;
+  background: var(--color-accent); color: #fff; font-size: 0.65rem; font-weight: 800;
+  padding: 3px 6px; border-radius: 8px; white-space: nowrap;
+  animation: badgeBounce 0.7s ease infinite; z-index: 2;
+  pointer-events: none;
+}
+@keyframes badgeBounce {
+  0%, 100% { transform: translateY(0); }
+  50%      { transform: translateY(-4px); }
+}
+
+/* ── Feedback ── */
+.feedback-overlay {
+  position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+  display: none; align-items: center; justify-content: center;
+  z-index: 100; pointer-events: none;
+}
+.feedback-overlay.show { display: flex; }
+.feedback-message {
+  font-size: 2.5rem; font-weight: 800; color: var(--color-success);
+  text-shadow: 2px 2px 8px rgba(0,0,0,0.15); pointer-events: none;
+  animation: bounceIn 0.6s cubic-bezier(0.34,1.56,0.64,1);
+}
+@keyframes bounceIn { from { transform: scale(0); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+
+.hint-toast {
+  position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%);
+  background: #FFF3CD; color: #856404; padding: 14px 28px; border-radius: 10px;
+  font-size: 1.1rem; font-weight: 600; box-shadow: 0 4px 16px rgba(0,0,0,0.18);
+  z-index: 100; animation: toastIn 0.35s ease; pointer-events: none; white-space: nowrap;
+}
+@keyframes toastIn {
+  from { transform: translateX(-50%) translateY(20px); opacity: 0; }
+  to   { transform: translateX(-50%) translateY(0); opacity: 1; }
+}
+.hint-toast.fade-out { animation: toastOut 0.3s ease forwards; }
+@keyframes toastOut { to { transform: translateX(-50%) translateY(20px); opacity: 0; } }
+
+.confetti-piece {
+  position: fixed; top: -10px; width: 10px; height: 10px;
+  border-radius: 2px; z-index: 101; pointer-events: none;
+}
+
+/* ── Responsive ── */
+@media (max-width: 768px) {
+  :root { --unit-size:22px; --rod-width:22px; --rod-height:110px; --flat-size:110px; }
+  .header { padding: 10px 14px; gap: 8px; }
+  .header h1 { font-size: 1.1rem; width: 100%; }
+  .main { flex-direction: column; padding: 12px; gap: 16px; align-items: center; }
+  .galera-section { width: 100%; align-items: center; }
+  .mat-section { width: 100%; }
+}
+@media (max-width: 480px) {
+  :root { --unit-size:18px; --rod-width:18px; --rod-height:90px; --flat-size:90px; }
+  .galera-cell { width: 46px; height: 46px; font-size: 1.4rem; }
+  .galera-carry-slot { width: 46px; }
+  .galera-cell.carry { width: 30px; height: 30px; font-size: 0.9rem; }
+  .galera-col-header { width: 46px; }
+  .btn { padding: 10px 16px; font-size: 0.95rem; }
+  .btn-check { font-size: 1.05rem; padding: 12px 28px; }
+}
+</style>
+</head>
+<body>
+
+<div class="header">
+  <h1>Place Value Subtraction</h1>
+  <a class="btn-home" href="index.html">Home</a>
+  <select id="difficultySelect" aria-label="Difficulty">
+    <option value="easy">Easy</option>
+    <option value="medium" selected>Medium</option>
+    <option value="hard">Hard</option>
+  </select>
+  <button class="btn-new" id="btnNew">New Problem</button>
+</div>
+
+<div class="main">
+
+  <!-- Galera -->
+  <div class="galera-section">
+    <div class="galera">
+      <div class="galera-row" style="margin-bottom:8px;">
+        <div class="galera-label"></div>
+        <div class="galera-col-header">H</div>
+        <div class="galera-col-header">T</div>
+        <div class="galera-col-header">O</div>
+      </div>
+      <div class="galera-row carry-row">
+        <div class="galera-label"></div>
+        <div class="galera-carry-slot"><input class="galera-cell carry" id="carry-h" maxlength="1" inputmode="numeric" aria-label="Borrow hundreds"></div>
+        <div class="galera-carry-slot"><input class="galera-cell carry" id="carry-t" maxlength="1" inputmode="numeric" aria-label="Borrow tens"></div>
+        <div class="galera-carry-slot"><input class="galera-cell carry" id="carry-o" maxlength="1" inputmode="numeric" aria-label="Borrow ones"></div>
+      </div>
+      <div class="galera-row">
+        <div class="galera-label"></div>
+        <input class="galera-cell" id="g-a1-h" maxlength="1" inputmode="numeric" aria-label="Minuend hundreds">
+        <input class="galera-cell" id="g-a1-t" maxlength="1" inputmode="numeric" aria-label="Minuend tens">
+        <input class="galera-cell" id="g-a1-o" maxlength="1" inputmode="numeric" aria-label="Minuend ones">
+      </div>
+      <div class="galera-row divider">
+        <div class="galera-label">&minus;</div>
+        <input class="galera-cell" id="g-a2-h" maxlength="1" inputmode="numeric" aria-label="Subtrahend hundreds">
+        <input class="galera-cell" id="g-a2-t" maxlength="1" inputmode="numeric" aria-label="Subtrahend tens">
+        <input class="galera-cell" id="g-a2-o" maxlength="1" inputmode="numeric" aria-label="Subtrahend ones">
+      </div>
+      <div class="galera-row">
+        <div class="galera-label">=</div>
+        <input class="galera-cell" id="g-r-h" maxlength="1" inputmode="numeric" aria-label="Result hundreds">
+        <input class="galera-cell" id="g-r-t" maxlength="1" inputmode="numeric" aria-label="Result tens">
+        <input class="galera-cell" id="g-r-o" maxlength="1" inputmode="numeric" aria-label="Result ones">
+      </div>
+    </div>
+    <button class="btn-check" id="btnCheck" disabled>Check Answer</button>
+  </div>
+
+  <!-- Mat (collapsible) -->
+  <div class="mat-section" id="matSection">
+    <div class="mat-toggle" id="matToggle">
+      <span class="arrow">&#9660;</span> Visual Blocks
+    </div>
+    <div class="mat-body">
+      <div class="mat" id="theMat">
+        <div class="mat-header">Hundreds<small>(100)</small></div>
+        <div class="mat-header">Tens<small>(10)</small></div>
+        <div class="mat-header">Ones<small>(1)</small></div>
+
+        <div class="mat-cell hundreds-col row-minuend" id="mat-a1-h"><span class="mat-row-label">Minuend</span></div>
+        <div class="mat-cell tens-col row-minuend" id="mat-a1-t"></div>
+        <div class="mat-cell ones-col row-minuend" id="mat-a1-o"></div>
+
+        <div class="mat-cell hundreds-col row-subtrahend" id="mat-a2-h"><span class="mat-row-label">Subtrahend</span></div>
+        <div class="mat-cell tens-col row-subtrahend" id="mat-a2-t"></div>
+        <div class="mat-cell ones-col row-subtrahend" id="mat-a2-o"></div>
+
+        <div class="mat-cell hundreds-col row-result" id="mat-r-h"><span class="mat-row-label">Result</span></div>
+        <div class="mat-cell tens-col row-result" id="mat-r-t"></div>
+        <div class="mat-cell ones-col row-result" id="mat-r-o"></div>
+      </div>
+      <div class="count-bar" id="countBar">
+        <div class="count-cell" id="count-h">Flats<span class="count-num">0</span></div>
+        <div class="count-cell" id="count-t">Rods<span class="count-num">0</span></div>
+        <div class="count-cell" id="count-o">Units<span class="count-num">0</span></div>
+        <div class="count-total">Counted: <span class="count-formed" id="countFormed">0</span></div>
+      </div>
+      <div class="mat-actions-wrap">
+        <button class="btn btn-subtract" id="btnSubtract" disabled>Take Away</button>
+        <button class="btn btn-borrow" id="btnBorrow">Borrow!</button>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<div class="feedback-overlay" id="feedbackOverlay"></div>
+
+<script>
+// ═══════════════════════════════════════════
+// State
+// ═══════════════════════════════════════════
+const state = {
+  difficulty: 'medium',
+  num1: 0, // minuend
+  num2: 0, // subtrahend
+  phase: 'input',
+  // phase: input | borrowed | borrowing-ones | borrowing-tens | ready | subtracting | mat-done
+  borrows: { tens: 0, hundreds: 0 },
+  animating: false,
+  answered: false,
+  matCollapsed: false,
+  // Modified minuend digits after borrowing
+  minuendMod: { ones: 0, tens: 0, hundreds: 0 },
+};
+
+function setState(u) { Object.assign(state, u); render(); }
+
+// ═══════════════════════════════════════════
+// Helpers
+// ═══════════════════════════════════════════
+function digits(n) {
+  return { hundreds: Math.floor(n/100), tens: Math.floor((n%100)/10), ones: n%10 };
+}
+function digitDisplay(d) {
+  return {
+    hundreds: d.hundreds || '',
+    tens:  d.hundreds ? String(d.tens) : (d.tens || ''),
+    ones: (d.hundreds || d.tens) ? String(d.ones) : (d.ones || ''),
+  };
+}
+function wait(ms) { return new Promise(r => setTimeout(r, ms)); }
+
+// ═══════════════════════════════════════════
+// Blocks
+// ═══════════════════════════════════════════
+function createBlocks(count, type) {
+  const f = document.createDocumentFragment();
+  for (let i = 0; i < count; i++) {
+    const el = document.createElement('div');
+    el.className = `block ${type} entrance`;
+    el.style.animationDelay = `${i * 0.04}s`;
+    f.appendChild(el);
+  }
+  return f;
+}
+function clearCell(id) {
+  const c = document.getElementById(id);
+  const l = c.querySelector('.mat-row-label');
+  c.innerHTML = '';
+  if (l) c.appendChild(l);
+}
+function fillCell(id, count, type) {
+  clearCell(id);
+  document.getElementById(id).appendChild(createBlocks(count, type));
+}
+function renderMatInput() {
+  const d1 = digits(state.num1), d2 = digits(state.num2);
+  fillCell('mat-a1-h', d1.hundreds, 'flat');
+  fillCell('mat-a1-t', d1.tens, 'rod');
+  fillCell('mat-a1-o', d1.ones, 'unit');
+  fillCell('mat-a2-h', d2.hundreds, 'flat');
+  fillCell('mat-a2-t', d2.tens, 'rod');
+  fillCell('mat-a2-o', d2.ones, 'unit');
+  clearCell('mat-r-h'); clearCell('mat-r-t'); clearCell('mat-r-o');
+  state.minuendMod = { ...d1 };
+  updateCountBar();
+}
+
+// ═══════════════════════════════════════════
+// Count Bar
+// ═══════════════════════════════════════════
+function updateCountBar() {
+  const mat = document.getElementById('theMat');
+  const flats = mat.querySelectorAll('.block.flat.counted').length;
+  const rods  = mat.querySelectorAll('.block.rod.counted').length;
+  const units = mat.querySelectorAll('.block.unit.counted').length;
+
+  document.querySelector('#count-h .count-num').textContent = flats;
+  document.querySelector('#count-t .count-num').textContent = rods;
+  document.querySelector('#count-o .count-num').textContent = units;
+
+  const total = flats * 100 + rods * 10 + units;
+  document.getElementById('countFormed').textContent = total;
+}
+
+// ═══════════════════════════════════════════
+// Galera refs
+// ═══════════════════════════════════════════
+const G = {
+  a1h: document.getElementById('g-a1-h'),
+  a1t: document.getElementById('g-a1-t'),
+  a1o: document.getElementById('g-a1-o'),
+  a2h: document.getElementById('g-a2-h'),
+  a2t: document.getElementById('g-a2-t'),
+  a2o: document.getElementById('g-a2-o'),
+  rh:  document.getElementById('g-r-h'),
+  rt:  document.getElementById('g-r-t'),
+  ro:  document.getElementById('g-r-o'),
+  ch:  document.getElementById('carry-h'),
+  ct:  document.getElementById('carry-t'),
+  co:  document.getElementById('carry-o'),
+};
+
+function setGaleraValues() {
+  const d1 = digitDisplay(digits(state.num1));
+  const d2 = digitDisplay(digits(state.num2));
+  G.a1h.value = d1.hundreds; G.a1t.value = d1.tens; G.a1o.value = d1.ones;
+  G.a2h.value = d2.hundreds; G.a2t.value = d2.tens; G.a2o.value = d2.ones;
+}
+function clearGaleraResults() {
+  G.rh.value=''; G.rt.value=''; G.ro.value='';
+  G.ch.value=''; G.ct.value=''; G.co.value='';
+  ['rh','rt','ro'].forEach(k => G[k].classList.remove('correct','incorrect'));
+}
+function lockInputs(keys, lock) {
+  keys.forEach(k => { G[k].readOnly = lock; G[k].classList.toggle('readonly', lock); });
+}
+
+// ═══════════════════════════════════════════
+// Borrow phase logic
+// ═══════════════════════════════════════════
+function determineBorrowPhase(minMod, sub) {
+  // Check ones first
+  if (minMod.ones < sub.ones) {
+    // Need to borrow into ones — but from where?
+    if (minMod.tens > 0) return 'borrowing-ones';
+    if (minMod.hundreds > 0) return 'borrowing-tens'; // cascade: borrow into tens first
+  }
+  // Check tens
+  if (minMod.tens < sub.tens) {
+    if (minMod.hundreds > 0) return 'borrowing-tens';
+  }
+  return 'ready';
+}
+
+// ═══════════════════════════════════════════
+// Render
+// ═══════════════════════════════════════════
+function render() {
+  const btnSubtract = document.getElementById('btnSubtract');
+  const btnBorrow   = document.getElementById('btnBorrow');
+  const btnCheck    = document.getElementById('btnCheck');
+  const hasNumbers  = state.num1 > 0 && state.num2 > 0;
+  const isValid     = hasNumbers && state.num1 >= state.num2;
+
+  // Take Away button: enabled in 'input' phase (will compute borrow needs) or 'ready' phase
+  btnSubtract.disabled = !isValid || state.animating ||
+    (state.phase !== 'input' && state.phase !== 'ready');
+
+  const needsBorrow = state.phase === 'borrowing-ones' || state.phase === 'borrowing-tens';
+  btnBorrow.classList.toggle('show', needsBorrow && !state.animating);
+
+  lockInputs(['a1h','a1t','a1o','a2h','a2t','a2o'], state.animating);
+  lockInputs(['rh','rt','ro'], !hasNumbers);
+  btnCheck.disabled = !hasNumbers || state.animating;
+
+  // Borrow cell highlighting
+  const onesCell = document.getElementById('mat-a1-o');
+  const tensCell = document.getElementById('mat-a1-t');
+
+  onesCell.classList.toggle('needs-borrow', state.phase === 'borrowing-ones');
+  tensCell.classList.toggle('needs-borrow', state.phase === 'borrowing-tens');
+
+  // Borrow badges
+  onesCell.querySelector('.borrow-badge')?.remove();
+  tensCell.querySelector('.borrow-badge')?.remove();
+  if (state.phase === 'borrowing-ones' && !state.animating) {
+    const b = document.createElement('span');
+    b.className = 'borrow-badge';
+    b.textContent = 'Need more!';
+    onesCell.appendChild(b);
+  }
+  if (state.phase === 'borrowing-tens' && !state.animating) {
+    const b = document.createElement('span');
+    b.className = 'borrow-badge';
+    b.textContent = 'Need more!';
+    tensCell.appendChild(b);
+  }
+
+  // Collapse state
+  document.getElementById('matSection').classList.toggle('collapsed', state.matCollapsed);
+}
+
+// ═══════════════════════════════════════════
+// Problem Generator
+// ═══════════════════════════════════════════
+function randInt(a,b) { return Math.floor(Math.random()*(b-a+1))+a; }
+function needsBorrowCheck(a,b) {
+  const da=digits(a), db=digits(b);
+  return da.ones < db.ones || da.tens < db.tens;
+}
+function borrowCount(a,b) {
+  const da=digits(a), db=digits(b);
+  let c=0, bo=0;
+  if (da.ones < db.ones) { c++; bo=1; }
+  if (da.tens - bo < db.tens) { c++; }
+  return c;
+}
+function generateProblem() {
+  const d=state.difficulty; let a,b;
+  if (d==='easy') {
+    do { a=randInt(2,99); b=randInt(1,a-1); } while(needsBorrowCheck(a,b));
+  } else if (d==='medium') {
+    do { a=randInt(20,499); b=randInt(1,a-1); } while(borrowCount(a,b)>1 || !needsBorrowCheck(a,b));
+  } else {
+    do { a=randInt(100,999); b=randInt(10,a-1); } while(borrowCount(a,b)<1);
+  }
+  return {a,b};
+}
+
+function readGaleraValues() {
+  return {
+    num1: (parseInt(G.a1h.value)||0)*100 + (parseInt(G.a1t.value)||0)*10 + (parseInt(G.a1o.value)||0),
+    num2: (parseInt(G.a2h.value)||0)*100 + (parseInt(G.a2t.value)||0)*10 + (parseInt(G.a2o.value)||0),
+  };
+}
+
+// ═══════════════════════════════════════════
+// Animation helpers
+// ═══════════════════════════════════════════
+function cleanAnimClasses(el) {
+  el.classList.remove('entrance','slide-down','highlight','shrink-away','pop-in');
+}
+function animateElement(el, cls) {
+  return new Promise(resolve => {
+    cleanAnimClasses(el);
+    void el.offsetWidth;
+    el.classList.add(cls);
+    el.addEventListener('animationend', () => resolve(), { once: true });
+  });
+}
+
+// ═══════════════════════════════════════════
+// Take Away (like Combine in addition, but removes)
+// ═══════════════════════════════════════════
+async function doTakeAway() {
+  if (state.animating) return;
+
+  // First check if borrowing is needed
+  const d1 = digits(state.num1), d2 = digits(state.num2);
+  if (state.phase === 'input') {
+    state.minuendMod = { ...d1 };
+    const bp = determineBorrowPhase(state.minuendMod, d2);
+    if (bp !== 'ready') {
+      setState({ phase: bp });
+      return;
+    }
+  }
+
+  setState({ animating: true });
+
+  const sub = digits(state.num2);
+  const mm = state.minuendMod;
+
+  // Highlight blocks to remove in minuend row, per column
+  async function removeFromColumn(cellId, selector, count) {
+    if (count === 0) return;
+    const cell = document.getElementById(cellId);
+    const blocks = Array.from(cell.querySelectorAll(selector));
+    const toRemove = blocks.slice(0, count);
+    // Highlight
+    toRemove.forEach(b => { cleanAnimClasses(b); void b.offsetWidth; b.classList.add('highlight'); });
+    await wait(600);
+    // Shrink away
+    const p = toRemove.map(b => animateElement(b, 'shrink-away'));
+    await Promise.all(p);
+    toRemove.forEach(b => b.remove());
+  }
+
+  await removeFromColumn('mat-a1-o', '.block.unit', sub.ones);
+  await removeFromColumn('mat-a1-t', '.block.rod', sub.tens);
+  await removeFromColumn('mat-a1-h', '.block.flat', sub.hundreds);
+
+  await wait(300);
+
+  // Move remaining blocks to result row
+  const resultOnes = mm.ones - sub.ones;
+  const resultTens = mm.tens - sub.tens;
+  const resultHundreds = mm.hundreds - sub.hundreds;
+
+  // Clear subtrahend row
+  clearCell('mat-a2-h'); clearCell('mat-a2-t'); clearCell('mat-a2-o');
+
+  // Move remaining from minuend to result
+  clearCell('mat-a1-h'); clearCell('mat-a1-t'); clearCell('mat-a1-o');
+  fillCell('mat-r-h', resultHundreds, 'flat');
+  fillCell('mat-r-t', resultTens, 'rod');
+  fillCell('mat-r-o', resultOnes, 'unit');
+
+  // Animate result blocks sliding down
+  document.querySelectorAll('.row-result .block').forEach((b, i) => {
+    cleanAnimClasses(b); b.classList.add('slide-down');
+    b.style.animationDelay = `${i * 0.03}s`;
+  });
+
+  await wait(600);
+  updateCountBar();
+  setState({ phase: 'mat-done', animating: false });
+}
+
+// ═══════════════════════════════════════════
+// Borrow — decompose block from next column
+// ═══════════════════════════════════════════
+async function doBorrow() {
+  if (state.animating) return;
+  setState({ animating: true });
+
+  const sub = digits(state.num2);
+
+  if (state.phase === 'borrowing-tens') {
+    // Borrow from hundreds into tens: flat → 10 rods
+    await borrowColumn('mat-a1-h', '.block.flat', 'mat-a1-t', 'rod', 10,
+      () => { state.minuendMod.hundreds -= 1; state.minuendMod.tens += 10; state.borrows.hundreds = 1; }
+    );
+    // After borrowing into tens, check if we still need to borrow for ones
+    const nextPhase = determineBorrowPhase(state.minuendMod, sub);
+    setState({ phase: nextPhase, animating: false });
+  } else if (state.phase === 'borrowing-ones') {
+    // Borrow from tens into ones: rod → 10 units
+    await borrowColumn('mat-a1-t', '.block.rod', 'mat-a1-o', 'unit', 10,
+      () => { state.minuendMod.tens -= 1; state.minuendMod.ones += 10; state.borrows.tens = 1; }
+    );
+    const nextPhase = determineBorrowPhase(state.minuendMod, sub);
+    setState({ phase: nextPhase, animating: false });
+  }
+}
+
+async function borrowColumn(srcId, srcSel, destId, newType, count, updateFn) {
+  const src = document.getElementById(srcId);
+  const blocks = Array.from(src.querySelectorAll(srcSel));
+  if (blocks.length === 0) return;
+
+  // Highlight the block being decomposed
+  const block = blocks[blocks.length - 1]; // take last one
+  cleanAnimClasses(block); void block.offsetWidth;
+  block.classList.add('highlight');
+  await wait(800);
+
+  // Shrink it away
+  await animateElement(block, 'shrink-away');
+  block.remove();
+
+  // Pop in new blocks in destination
+  const dest = document.getElementById(destId);
+  for (let i = 0; i < count; i++) {
+    const nb = document.createElement('div');
+    nb.className = `block ${newType} pop-in`;
+    nb.style.animationDelay = `${i * 0.04}s`;
+    dest.appendChild(nb);
+  }
+
+  updateFn();
+  await wait(500);
+  updateCountBar();
+}
+
+// ═══════════════════════════════════════════
+// Check Answer
+// ═══════════════════════════════════════════
+function checkAnswer() {
+  ['rh','rt','ro'].forEach(k => G[k].classList.remove('correct','incorrect'));
+  const diff = state.num1 - state.num2;
+  const cd = digits(diff);
+  const dd = digitDisplay(cd);
+  const uh = G.rh.value, ut = G.rt.value, uo = G.ro.value;
+  let ok = true;
+  [['rh', uh, dd.hundreds],['rt', ut, dd.tens],['ro', uo, dd.ones]].forEach(([k,u,c]) => {
+    const uStr = String(u);
+    const cStr = String(c);
+    if (uStr === cStr) G[k].classList.add('correct');
+    else { G[k].classList.add('incorrect'); ok = false; }
+  });
+  if (ok) { celebrate(); setState({ answered: true }); }
+  else showHint();
+}
+
+// ═══════════════════════════════════════════
+// Celebration / Hint / Audio
+// ═══════════════════════════════════════════
+function celebrate() {
+  playChime(); showConfetti();
+  const ov = document.getElementById('feedbackOverlay');
+  ov.innerHTML = '<div class="feedback-message">Great job!</div>';
+  ov.classList.add('show');
+  setTimeout(() => { ov.classList.remove('show'); ov.innerHTML = ''; clearConfetti(); }, 3000);
+}
+function showConfetti() {
+  const colors = ['#FF6B6B','#4ECDC4','#45B7D1','#96CEB4','#FFEAA7','#DDA0DD','#FF8C00','#7B68EE'];
+  if (!document.getElementById('confetti-kf')) {
+    const s = document.createElement('style'); s.id = 'confetti-kf';
+    s.textContent = `@keyframes confettiFall{0%{transform:translateY(0) translateX(0) rotate(0);opacity:1}100%{transform:translateY(100vh) translateX(var(--drift)) rotate(var(--rot));opacity:0}}`;
+    document.head.appendChild(s);
+  }
+  for (let i = 0; i < 30; i++) {
+    const p = document.createElement('div'); p.className = 'confetti-piece';
+    p.style.left = Math.random()*100+'vw';
+    p.style.backgroundColor = colors[Math.floor(Math.random()*colors.length)];
+    p.style.width = (Math.random()*8+6)+'px'; p.style.height = (Math.random()*8+6)+'px';
+    p.style.borderRadius = Math.random()>0.5 ? '50%' : '2px';
+    p.style.setProperty('--drift', (Math.random()*200-100).toFixed(0)+'px');
+    p.style.setProperty('--rot', (Math.random()*720).toFixed(0)+'deg');
+    p.style.animation = `confettiFall ${(Math.random()*2+1.5).toFixed(2)}s ${(Math.random()*0.5).toFixed(2)}s ease-in forwards`;
+    document.body.appendChild(p);
+  }
+}
+function clearConfetti() { document.querySelectorAll('.confetti-piece').forEach(e => e.remove()); }
+function showHint() {
+  document.querySelectorAll('.hint-toast').forEach(e => e.remove());
+  const t = document.createElement('div'); t.className = 'hint-toast';
+  t.textContent = 'Count the remaining blocks in each column and try again!';
+  document.body.appendChild(t);
+  setTimeout(() => { t.classList.add('fade-out'); t.addEventListener('animationend', () => t.remove(), { once: true }); }, 2500);
+}
+function playChime() {
+  try {
+    const ctx = new (window.AudioContext || window.webkitAudioContext)();
+    [523.25, 659.25, 783.99].forEach((f, i) => {
+      const o = ctx.createOscillator(), g = ctx.createGain();
+      o.type = 'sine'; o.frequency.value = f;
+      g.gain.setValueAtTime(0.15, ctx.currentTime + i*0.15);
+      g.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + i*0.15 + 0.8);
+      o.connect(g); g.connect(ctx.destination);
+      o.start(ctx.currentTime + i*0.15); o.stop(ctx.currentTime + i*0.15 + 0.8);
+    });
+  } catch(e) {}
+}
+
+// ═══════════════════════════════════════════
+// New Problem / Reset
+// ═══════════════════════════════════════════
+function resetToInput() {
+  clearGaleraResults();
+  state.phase = 'input';
+  state.borrows = { tens: 0, hundreds: 0 };
+  state.minuendMod = { ones: 0, tens: 0, hundreds: 0 };
+  state.animating = false; state.answered = false;
+  renderMatInput(); render();
+}
+function newProblem() {
+  const {a, b} = generateProblem();
+  clearConfetti();
+  document.getElementById('feedbackOverlay').classList.remove('show');
+  document.querySelectorAll('.hint-toast').forEach(e => e.remove());
+  state.num1 = a; state.num2 = b;
+  resetToInput(); setGaleraValues(); render();
+}
+
+// ═══════════════════════════════════════════
+// Input Handling
+// ═══════════════════════════════════════════
+function handleOperandInput() {
+  this.value = this.value.replace(/[^0-9]/g, '').slice(0, 1);
+  const { num1, num2 } = readGaleraValues();
+  state.num1 = num1; state.num2 = num2;
+  if (state.phase !== 'input') {
+    state.phase = 'input';
+    state.borrows = { tens: 0, hundreds: 0 };
+    state.minuendMod = { ones: 0, tens: 0, hundreds: 0 };
+    clearGaleraResults();
+  }
+  state.answered = false;
+  renderMatInput(); render();
+}
+
+['a1h','a1t','a1o','a2h','a2t','a2o'].forEach(k => {
+  G[k].addEventListener('input', handleOperandInput);
+});
+['rh','rt','ro'].forEach(k => {
+  G[k].addEventListener('input', function() {
+    this.value = this.value.replace(/[^0-9]/g, '').slice(0, 1);
+    this.classList.remove('correct', 'incorrect');
+  });
+});
+// Borrow inputs — editable, filter to digits
+['ch','ct','co'].forEach(k => {
+  G[k].addEventListener('input', function() {
+    this.value = this.value.replace(/[^0-9]/g, '').slice(0, 1);
+  });
+});
+
+// ═══════════════════════════════════════════
+// Block counting
+// ═══════════════════════════════════════════
+document.getElementById('theMat').addEventListener('click', (e) => {
+  const block = e.target.closest('.block');
+  if (!block || state.animating) return;
+  block.classList.toggle('counted');
+  updateCountBar();
+});
+
+// ═══════════════════════════════════════════
+// Collapse toggle
+// ═══════════════════════════════════════════
+document.getElementById('matToggle').addEventListener('click', () => {
+  setState({ matCollapsed: !state.matCollapsed });
+});
+
+// ═══════════════════════════════════════════
+// Event Listeners
+// ═══════════════════════════════════════════
+document.getElementById('btnNew').addEventListener('click', newProblem);
+document.getElementById('btnSubtract').addEventListener('click', () => {
+  if (state.num1 > 0 && state.num2 > 0 && state.num1 >= state.num2) doTakeAway();
+});
+document.getElementById('btnBorrow').addEventListener('click', doBorrow);
+document.getElementById('btnCheck').addEventListener('click', () => {
+  const { num1, num2 } = readGaleraValues();
+  state.num1 = num1; state.num2 = num2;
+  if (state.num1 > 0 && state.num2 > 0 && state.num1 >= state.num2) checkAnswer();
+});
+document.getElementById('difficultySelect').addEventListener('change', function() {
+  state.difficulty = this.value;
+});
+
+// ═══════════════════════════════════════════
+// Init
+// ═══════════════════════════════════════════
+newProblem();
+</script>
+</body>
+</html>

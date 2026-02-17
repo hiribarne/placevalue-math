@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<title>Place Value Math</title>
+<style>
+:root {
+  --color-bg: #F7F3EE;
+  --color-header: #5B4A8A;
+  --color-text: #333;
+  --color-light-text: #777;
+}
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  background: var(--color-bg);
+  color: var(--color-text);
+  min-height: 100vh;
+  -webkit-tap-highlight-color: transparent;
+  display: flex; flex-direction: column; align-items: center;
+}
+
+.header {
+  background: var(--color-header);
+  color: #fff;
+  padding: 16px 20px;
+  width: 100%;
+  text-align: center;
+}
+.header h1 { font-size: 1.5rem; font-weight: 700; }
+.header p { font-size: 0.9rem; opacity: 0.8; margin-top: 4px; }
+
+.cards {
+  display: flex; gap: 24px; padding: 40px 20px;
+  max-width: 700px; width: 100%; justify-content: center;
+  flex-wrap: wrap;
+}
+
+.card {
+  flex: 1; min-width: 240px; max-width: 320px;
+  background: #fff; border-radius: 16px;
+  box-shadow: 0 4px 16px rgba(0,0,0,0.10);
+  text-decoration: none; color: var(--color-text);
+  padding: 32px 24px; text-align: center;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  cursor: pointer;
+}
+.card:hover { transform: translateY(-4px); box-shadow: 0 8px 24px rgba(0,0,0,0.15); }
+.card:active { transform: translateY(-1px); }
+
+.card-icon {
+  font-size: 3.5rem; margin-bottom: 16px; line-height: 1;
+}
+.card h2 { font-size: 1.3rem; font-weight: 700; margin-bottom: 8px; }
+.card p { font-size: 0.9rem; color: var(--color-light-text); line-height: 1.4; }
+
+.card-addition { border-top: 4px solid #4CAF50; }
+.card-addition .card-icon { color: #4CAF50; }
+
+.card-subtraction { border-top: 4px solid #E8573A; }
+.card-subtraction .card-icon { color: #E8573A; }
+
+@media (max-width: 520px) {
+  .cards { flex-direction: column; align-items: center; padding: 24px 16px; gap: 16px; }
+  .card { min-width: 0; width: 100%; }
+}
+</style>
+</head>
+<body>
+
+<div class="header">
+  <h1>Place Value Math</h1>
+  <p>Practice with base-10 blocks and the galera</p>
+</div>
+
+<div class="cards">
+  <a class="card card-addition" href="addition.html">
+    <div class="card-icon">+</div>
+    <h2>Addition</h2>
+    <p>Add numbers with carrying and regrouping</p>
+  </a>
+  <a class="card card-subtraction" href="subtraction.html">
+    <div class="card-icon">&minus;</div>
+    <h2>Subtraction</h2>
+    <p>Subtract numbers with borrowing and decomposing</p>
+  </a>
+</div>
+
+</body>
+</html>
