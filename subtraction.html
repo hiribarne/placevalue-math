@@ -945,19 +945,32 @@ function handleOperandInput() {
   renderMatInput(); render();
 }
 
+// Auto-advance: move focus to next cell after typing a digit
+const advanceOrder = ['carry-h','carry-t','carry-o','g-a1-h','g-a1-t','g-a1-o','g-a2-h','g-a2-t','g-a2-o','g-r-h','g-r-t','g-r-o'];
+function autoAdvance(el) {
+  if (!el.value) return;
+  const idx = advanceOrder.indexOf(el.id);
+  for (let i = idx + 1; i < advanceOrder.length; i++) {
+    const next = document.getElementById(advanceOrder[i]);
+    if (next && !next.readOnly) { next.focus(); next.select(); return; }
+  }
+}
+
 ['a1h','a1t','a1o','a2h','a2t','a2o'].forEach(k => {
-  G[k].addEventListener('input', handleOperandInput);
+  G[k].addEventListener('input', function() { handleOperandInput.call(this); autoAdvance(this); });
 });
 ['rh','rt','ro'].forEach(k => {
   G[k].addEventListener('input', function() {
     this.value = this.value.replace(/[^0-9]/g, '').slice(0, 1);
     this.classList.remove('correct', 'incorrect');
+    autoAdvance(this);
   });
 });
 // Borrow inputs — editable, filter to digits
 ['ch','ct','co'].forEach(k => {
   G[k].addEventListener('input', function() {
     this.value = this.value.replace(/[^0-9]/g, '').slice(0, 1);
+    autoAdvance(this);
   });
 });
 
