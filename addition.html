@@ -136,6 +136,15 @@ body {
 }
 .btn-check:active { transform: scale(0.96); }
 .btn-check:disabled { opacity: 0.4; cursor: not-allowed; }
+.galera-buttons { display: flex; gap: 10px; width: 100%; max-width: 280px; }
+.galera-buttons .btn-check { flex: 1; }
+.btn-clear {
+  background: #fff; color: var(--color-light-text); padding: 14px 16px;
+  font-size: 1.15rem; font-weight: 700; border: 2px solid var(--color-border);
+  border-radius: 10px; cursor: pointer; min-height: 48px;
+  transition: transform 0.15s ease;
+}
+.btn-clear:active { transform: scale(0.96); }
 
 /* ── Mat Section (collapsible) ── */
 .mat-section { display: flex; flex-direction: column; gap: 0; flex: 0.85; }
@@ -423,7 +432,10 @@ body {
         <input class="galera-cell" id="g-r-o" maxlength="1" inputmode="numeric" aria-label="Result ones">
       </div>
     </div>
-    <button class="btn-check" id="btnCheck" disabled>Check Answer</button>
+    <div class="galera-buttons">
+      <button class="btn-clear" id="btnClear">Clear</button>
+      <button class="btn-check" id="btnCheck" disabled>Check Answer</button>
+    </div>
   </div>
 
   <!-- Mat (collapsible) -->
@@ -889,6 +901,15 @@ document.getElementById('matToggle').addEventListener('click', () => {
 // ═══════════════════════════════════════════
 // Event Listeners
 // ═══════════════════════════════════════════
+document.getElementById('btnClear').addEventListener('click', () => {
+  clearConfetti();
+  document.getElementById('feedbackOverlay').classList.remove('show');
+  document.querySelectorAll('.hint-toast').forEach(e=>e.remove());
+  G.a1h.value=''; G.a1t.value=''; G.a1o.value='';
+  G.a2h.value=''; G.a2t.value=''; G.a2o.value='';
+  state.num1=0; state.num2=0;
+  resetToInput(); render();
+});
 document.getElementById('btnNew').addEventListener('click', newProblem);
 document.getElementById('btnCombine').addEventListener('click', () => {
   if (state.num1>0 && state.num2>0) doCombine();
