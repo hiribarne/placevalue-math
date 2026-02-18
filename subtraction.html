@@ -146,6 +146,21 @@ body {
 }
 .btn-clear:active { transform: scale(0.96); }
 
+/* Guide Me */
+.btn-guide { background: #6C5CE7; color: #fff; font-weight: 600; }
+.btn-guide:active { transform: scale(0.96); }
+.btn-guide.active { background: #A29BFE; }
+.guide-prompt {
+  background: #6C5CE7; color: #fff; padding: 12px 20px; border-radius: 10px;
+  font-size: 1.15rem; font-weight: 600; text-align: center;
+  width: 100%; max-width: 320px; display: none; line-height: 1.4;
+}
+.guide-prompt.show { display: block; }
+.galera-cell.guide-active {
+  border-color: #6C5CE7 !important;
+  box-shadow: 0 0 0 3px rgba(108,92,231,0.25) !important;
+}
+
 /* ── Mat Section (collapsible) ── */
 .mat-section { display: flex; flex-direction: column; gap: 0; flex: 0.85; }
 .mat-toggle {
@@ -394,6 +409,7 @@ body {
     <option value="hard">Hard</option>
   </select>
   <button class="btn-new" id="btnNew">New Problem</button>
+  <button class="btn-guide header-btn" id="btnGuide">Guide Me</button>
 </div>
 
 <div class="main">
@@ -432,6 +448,7 @@ body {
         <input class="galera-cell" id="g-r-o" maxlength="1" inputmode="numeric" aria-label="Result ones">
       </div>
     </div>
+    <div class="guide-prompt" id="guidePrompt"></div>
     <div class="galera-buttons">
       <button class="btn-clear" id="btnClear">Clear</button>
       <button class="btn-check" id="btnCheck" disabled>Check Answer</button>
@@ -494,6 +511,7 @@ const state = {
   matCollapsed: false,
   // Modified minuend digits after borrowing
   minuendMod: { ones: 0, tens: 0, hundreds: 0 },
+  guide: null, // null | 'ones' | 'tens' | 'hundreds' | 'done'
 };
 
 function setState(u) { Object.assign(state, u); render(); }
@@ -662,6 +680,23 @@ function render() {
 
   // Collapse state
   document.getElementById('matSection').classList.toggle('collapsed', state.matCollapsed);
+
+  // Guide rendering
+  const guideEl = document.getElementById('guidePrompt');
+  const btnGuide = document.getElementById('btnGuide');
+  ['ro','rt','rh'].forEach(k => G[k].classList.remove('guide-active'));
+  if (state.guide && state.guide !== 'done') {
+    guideEl.textContent = getGuidePrompt();
+    guideEl.classList.add('show');
+    btnGuide.classList.add('active');
+    btnGuide.textContent = 'Guide: On';
+    const key = state.guide === 'ones' ? 'ro' : state.guide === 'tens' ? 'rt' : 'rh';
+    G[key].classList.add('guide-active');
+  } else {
+    guideEl.classList.remove('show');
+    btnGuide.classList.remove('active');
+    btnGuide.textContent = 'Guide Me';
+  }
 }
 
 // ═══════════════════════════════════════════
@@ -921,11 +956,76 @@ function resetToInput() {
 }
 function newProblem() {
   const {a, b} = generateProblem();
+  const wasGuide = !!state.guide;
   clearConfetti();
   document.getElementById('feedbackOverlay').classList.remove('show');
   document.querySelectorAll('.hint-toast').forEach(e => e.remove());
   state.num1 = a; state.num2 = b;
-  resetToInput(); setGaleraValues(); render();
+  resetToInput(); setGaleraValues();
+  if (wasGuide) state.guide = 'ones';
+  render();
+  if (wasGuide) G.ro.focus();
+}
+
+// ═══════════════════════════════════════════
+// Guide
+// ═══════════════════════════════════════════
+function getSubtractionSteps() {
+  const d1=digits(state.num1), d2=digits(state.num2);
+  let m={hundreds:d1.hundreds, tens:d1.tens, ones:d1.ones};
+  let ob=false, tb=false;
+  if (m.ones<d2.ones) {
+    if (m.tens>0) { m.tens--; m.ones+=10; ob=true; }
+    else if (m.hundreds>0) { m.hundreds--; m.tens+=9; m.ones+=10; ob=true; tb=true; }
+  }
+  if (m.tens<d2.tens) {
+    if (m.hundreds>0) { m.hundreds--; m.tens+=10; tb=true; }
+  }
+  return {
+    ones: {a:m.ones, b:d2.ones, result:m.ones-d2.ones, borrowed:ob, orig:d1.ones},
+    tens: {a:m.tens, b:d2.tens, result:m.tens-d2.tens, borrowed:tb, orig:d1.tens},
+    hundreds: {a:m.hundreds, b:d2.hundreds, result:m.hundreds-d2.hundreds},
+    needsHundreds: d1.hundreds>0 || d2.hundreds>0,
+  };
+}
+function getGuidePrompt() {
+  if (!state.guide || state.guide==='done') return '';
+  const exp=getSubtractionSteps(), info=exp[state.guide];
+  const col=state.guide.charAt(0).toUpperCase()+state.guide.slice(1);
+  if (info.borrowed) {
+    return col+': '+info.orig+' < '+info.b+' — Borrow! '+info.a+' \u2212 '+info.b+' = ?';
+  }
+  return col+': '+info.a+' \u2212 '+info.b+' = ?';
+}
+function checkGuideStep() {
+  if (!state.guide || state.guide==='done') return;
+  const exp=getSubtractionSteps(), step=state.guide, info=exp[step];
+  const key = step==='ones'?'ro': step==='tens'?'rt':'rh';
+  const val=G[key].value;
+  if (val==='') return;
+  if (parseInt(val)===info.result) {
+    G[key].classList.remove('incorrect'); G[key].classList.add('correct');
+    setTimeout(()=>{
+      let next;
+      if (step==='ones') next='tens';
+      else if (step==='tens') next=exp.needsHundreds?'hundreds':'done';
+      else next='done';
+      state.guide=next; render();
+      if (next==='done') { celebrate(); state.answered=true; }
+      else { const nk=next==='tens'?'rt':'rh'; G[nk].focus(); }
+    },500);
+  } else {
+    G[key].classList.remove('correct'); G[key].classList.add('incorrect');
+    showHint();
+  }
+}
+function toggleGuide() {
+  if (state.guide) { state.guide=null; }
+  else if (state.num1>0 && state.num2>0 && state.num1>=state.num2) {
+    clearGaleraResults(); state.guide='ones'; state.answered=false;
+  }
+  render();
+  if (state.guide) G.ro.focus();
 }
 
 // ═══════════════════════════════════════════
@@ -942,6 +1042,10 @@ function handleOperandInput() {
     clearGaleraResults();
   }
   state.answered = false;
+  if (state.guide) {
+    state.guide = (state.num1>0 && state.num2>0 && state.num1>=state.num2) ? 'ones' : null;
+    clearGaleraResults();
+  }
   renderMatInput(); render();
 }
 
@@ -963,7 +1067,8 @@ function autoAdvance(el) {
   G[k].addEventListener('input', function() {
     this.value = this.value.replace(/[^0-9]/g, '').slice(0, 1);
     this.classList.remove('correct', 'incorrect');
-    autoAdvance(this);
+    if (state.guide) checkGuideStep();
+    else autoAdvance(this);
   });
 });
 // Borrow inputs — editable, filter to digits
@@ -1000,10 +1105,11 @@ document.getElementById('btnClear').addEventListener('click', () => {
   document.querySelectorAll('.hint-toast').forEach(e => e.remove());
   G.a1h.value=''; G.a1t.value=''; G.a1o.value='';
   G.a2h.value=''; G.a2t.value=''; G.a2o.value='';
-  state.num1=0; state.num2=0;
+  state.num1=0; state.num2=0; state.guide=null;
   resetToInput(); render();
 });
 document.getElementById('btnNew').addEventListener('click', newProblem);
+document.getElementById('btnGuide').addEventListener('click', toggleGuide);
 document.getElementById('btnSubtract').addEventListener('click', () => {
   if (state.num1 > 0 && state.num2 > 0 && state.num1 >= state.num2) doTakeAway();
 });
