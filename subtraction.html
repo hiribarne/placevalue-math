@@ -396,6 +396,85 @@ body {
   .btn { padding: 10px 16px; font-size: 0.95rem; }
   .btn-check { font-size: 1.05rem; padding: 12px 28px; }
 }
+
+/* ── Narration Bar ── */
+.narration-bar {
+  display: none; align-items: center; gap: 12px;
+  background: linear-gradient(135deg, #6C5CE7, #a855f7);
+  color: #fff; padding: 14px 20px; border-radius: 12px;
+  width: 100%; max-width: 380px;
+  box-shadow: 0 4px 12px rgba(108,92,231,0.3);
+  min-height: 60px;
+}
+.narration-bar.visible { display: flex; }
+.narration-icon {
+  font-size: 1.8rem; flex-shrink: 0;
+  animation: iconBob 2s ease-in-out infinite;
+}
+@keyframes iconBob {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-4px); }
+}
+.narration-icon.speaking {
+  animation: iconPulse 0.5s ease infinite;
+}
+@keyframes iconPulse {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.15); }
+}
+.narration-text {
+  flex: 1; font-size: 1.15rem; font-weight: 600;
+  line-height: 1.3; transition: opacity 0.3s ease;
+}
+.narration-mute {
+  background: rgba(255,255,255,0.2); border: none; border-radius: 8px;
+  padding: 6px 10px; font-size: 1.3rem; cursor: pointer;
+  flex-shrink: 0; min-height: 40px; min-width: 40px;
+  display: flex; align-items: center; justify-content: center;
+}
+.narration-mute:active { transform: scale(0.9); }
+
+/* ── Movement Arrows ── */
+.movement-arrow {
+  position: absolute; top: 0; left: 0;
+  pointer-events: none; z-index: 10; overflow: visible;
+}
+.movement-arrow path {
+  animation: arrowFadeIn 0.4s ease forwards, arrowMarch 0.8s linear infinite;
+}
+@keyframes arrowFadeIn { from { opacity: 0; } to { opacity: 1; } }
+@keyframes arrowMarch { to { stroke-dashoffset: -24; } }
+
+/* ── Galera borrow animations ── */
+.floating-digit {
+  position: fixed; z-index: 200; pointer-events: none;
+  font-size: 1.5rem; font-weight: 800; color: var(--color-accent);
+  font-family: 'Courier New', monospace;
+  transition: all 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+.galera-cell.carry-bounce {
+  animation: carryBounce 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+@keyframes carryBounce {
+  0% { transform: scale(0.3); opacity: 0; }
+  60% { transform: scale(1.2); }
+  100% { transform: scale(1); opacity: 1; }
+}
+.galera-strike {
+  pointer-events: none; z-index: 50;
+  transition: width 0.3s ease;
+}
+
+/* ── Narration responsive ── */
+@media (max-width: 768px) {
+  .narration-bar { max-width: 100%; padding: 12px 16px; }
+  .narration-text { font-size: 1.05rem; }
+}
+@media (max-width: 480px) {
+  .narration-bar { padding: 10px 12px; gap: 8px; }
+  .narration-icon { font-size: 1.4rem; }
+  .narration-text { font-size: 0.95rem; }
+}
 </style>
 </head>
 <body>
@@ -449,6 +528,11 @@ body {
       </div>
     </div>
     <div class="guide-prompt" id="guidePrompt"></div>
+    <div class="narration-bar" id="narrationBar">
+      <div class="narration-icon" id="narrationIcon">&#x1F9D1;&#x200D;&#x1F3EB;</div>
+      <div class="narration-text" id="narrationText"></div>
+      <button class="narration-mute" id="btnMute" aria-label="Toggle sound">&#x1F50A;</button>
+    </div>
     <div class="galera-buttons">
       <button class="btn-clear" id="btnClear">Clear</button>
       <button class="btn-check" id="btnCheck" disabled>Check Answer</button>
@@ -516,6 +600,8 @@ const state = {
 
 function setState(u) { Object.assign(state, u); render(); }
 
+const narrationState = { muted: false };
+
 // ═══════════════════════════════════════════
 // Helpers
 // ═══════════════════════════════════════════
@@ -530,6 +616,206 @@ function digitDisplay(d) {
   };
 }
 function wait(ms) { return new Promise(r => setTimeout(r, ms)); }
+
+// ═══════════════════════════════════════════
+// Narration & Audio
+// ═══════════════════════════════════════════
+function speakText(text) {
+  if (narrationState.muted) return;
+  speechSynthesis.cancel();
+  const u = new SpeechSynthesisUtterance(text);
+  u.rate = 0.85; u.pitch = 1.1;
+  const voices = speechSynthesis.getVoices();
+  const pref = voices.find(v => v.name.includes('Samantha') || v.name.includes('Google US English'));
+  if (pref) u.voice = pref;
+  const icon = document.getElementById('narrationIcon');
+  u.onstart = () => icon.classList.add('speaking');
+  u.onend = () => icon.classList.remove('speaking');
+  speechSynthesis.speak(u);
+}
+function setNarration(text) {
+  const bar = document.getElementById('narrationBar');
+  const textEl = document.getElementById('narrationText');
+  textEl.style.opacity = '0';
+  bar.classList.add('visible');
+  setTimeout(() => { textEl.textContent = text; textEl.style.opacity = '1'; }, 200);
+  if (!narrationState.muted) speakText(text);
+}
+function clearNarration() {
+  const bar = document.getElementById('narrationBar');
+  const textEl = document.getElementById('narrationText');
+  textEl.style.opacity = '0';
+  speechSynthesis.cancel();
+  document.getElementById('narrationIcon').classList.remove('speaking');
+  setTimeout(() => { textEl.textContent = ''; bar.classList.remove('visible'); }, 300);
+}
+function playSfx(type) {
+  if (narrationState.muted) return;
+  try {
+    const ctx = new (window.AudioContext || window.webkitAudioContext)();
+    const now = ctx.currentTime;
+    const o = ctx.createOscillator(), g = ctx.createGain();
+    if (type === 'swoosh') {
+      o.type = 'sawtooth';
+      o.frequency.setValueAtTime(800, now);
+      o.frequency.exponentialRampToValueAtTime(200, now + 0.3);
+      g.gain.setValueAtTime(0.12, now);
+      g.gain.exponentialRampToValueAtTime(0.001, now + 0.3);
+      o.connect(g); g.connect(ctx.destination);
+      o.start(now); o.stop(now + 0.3);
+    } else if (type === 'pop') {
+      o.type = 'sine';
+      o.frequency.setValueAtTime(600, now);
+      o.frequency.exponentialRampToValueAtTime(200, now + 0.15);
+      g.gain.setValueAtTime(0.2, now);
+      g.gain.exponentialRampToValueAtTime(0.001, now + 0.15);
+      o.connect(g); g.connect(ctx.destination);
+      o.start(now); o.stop(now + 0.15);
+    } else if (type === 'snap') {
+      o.type = 'square';
+      o.frequency.setValueAtTime(1200, now);
+      o.frequency.exponentialRampToValueAtTime(100, now + 0.2);
+      g.gain.setValueAtTime(0.15, now);
+      g.gain.exponentialRampToValueAtTime(0.001, now + 0.2);
+      o.connect(g); g.connect(ctx.destination);
+      o.start(now); o.stop(now + 0.2);
+    } else if (type === 'ding') {
+      o.type = 'sine';
+      o.frequency.setValueAtTime(880, now);
+      g.gain.setValueAtTime(0.15, now);
+      g.gain.exponentialRampToValueAtTime(0.001, now + 0.5);
+      o.connect(g); g.connect(ctx.destination);
+      o.start(now); o.stop(now + 0.5);
+    } else if (type === 'boop') {
+      o.type = 'sine';
+      o.frequency.setValueAtTime(400, now);
+      o.frequency.exponentialRampToValueAtTime(200, now + 0.25);
+      g.gain.setValueAtTime(0.15, now);
+      g.gain.exponentialRampToValueAtTime(0.001, now + 0.25);
+      o.connect(g); g.connect(ctx.destination);
+      o.start(now); o.stop(now + 0.25);
+    }
+  } catch(e) {}
+}
+
+// ═══════════════════════════════════════════
+// Movement Arrows
+// ═══════════════════════════════════════════
+function showMovementArrow(fromCellId, toCellId) {
+  const matBody = document.querySelector('.mat-body');
+  matBody.style.position = 'relative';
+  const bodyRect = matBody.getBoundingClientRect();
+  const fromEl = document.getElementById(fromCellId);
+  const toEl = document.getElementById(toCellId);
+  const fromRect = fromEl.getBoundingClientRect();
+  const toRect = toEl.getBoundingClientRect();
+
+  const x1 = fromRect.left + fromRect.width / 2 - bodyRect.left;
+  const y1 = fromRect.top + fromRect.height / 4 - bodyRect.top;
+  const x2 = toRect.left + toRect.width / 2 - bodyRect.left;
+  const y2 = toRect.top + toRect.height / 4 - bodyRect.top;
+
+  const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+  svg.classList.add('movement-arrow');
+  svg.setAttribute('width', bodyRect.width);
+  svg.setAttribute('height', bodyRect.height);
+
+  const markerId = 'ah-' + Date.now();
+  const defs = document.createElementNS('http://www.w3.org/2000/svg', 'defs');
+  const marker = document.createElementNS('http://www.w3.org/2000/svg', 'marker');
+  marker.setAttribute('id', markerId);
+  marker.setAttribute('markerWidth', '10'); marker.setAttribute('markerHeight', '7');
+  marker.setAttribute('refX', '10'); marker.setAttribute('refY', '3.5');
+  marker.setAttribute('orient', 'auto');
+  const poly = document.createElementNS('http://www.w3.org/2000/svg', 'polygon');
+  poly.setAttribute('points', '0 0, 10 3.5, 0 7');
+  poly.setAttribute('fill', '#E8573A');
+  marker.appendChild(poly); defs.appendChild(marker); svg.appendChild(defs);
+
+  const midX = (x1 + x2) / 2;
+  const midY = Math.min(y1, y2) - 30;
+  const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+  path.setAttribute('d', `M${x1},${y1} Q${midX},${midY} ${x2},${y2}`);
+  path.setAttribute('stroke', '#E8573A');
+  path.setAttribute('stroke-width', '3');
+  path.setAttribute('fill', 'none');
+  path.setAttribute('stroke-dasharray', '8 4');
+  path.setAttribute('marker-end', `url(#${markerId})`);
+  svg.appendChild(path);
+
+  matBody.appendChild(svg);
+  return svg;
+}
+function removeMovementArrows() {
+  document.querySelectorAll('.movement-arrow').forEach(el => el.remove());
+}
+
+// ═══════════════════════════════════════════
+// Galera Borrow Animation
+// ═══════════════════════════════════════════
+function addStrikeThrough(cellId) {
+  const el = document.getElementById(cellId);
+  const rect = el.getBoundingClientRect();
+  const line = document.createElement('div');
+  line.className = 'galera-strike';
+  line.style.position = 'fixed';
+  line.style.top = (rect.top + rect.height / 2) + 'px';
+  line.style.left = (rect.left + rect.width * 0.1) + 'px';
+  line.style.width = '0';
+  line.style.height = '3px';
+  line.style.background = 'var(--color-accent)';
+  line.style.borderRadius = '2px';
+  line.style.transform = 'translateY(-50%) rotate(-15deg)';
+  document.body.appendChild(line);
+  void line.offsetWidth;
+  line.style.width = (rect.width * 0.8) + 'px';
+  return line;
+}
+function clearGaleraStrikes() {
+  document.querySelectorAll('.galera-strike').forEach(el => el.remove());
+}
+function animateBorrowInGalera(srcMinuendId, srcCarryId, destCarryId, newSrcDigit) {
+  return new Promise(resolve => {
+    // Strike through the source minuend digit
+    addStrikeThrough(srcMinuendId);
+
+    // Show decreased value in carry cell above source
+    setTimeout(() => {
+      const srcCarry = document.getElementById(srcCarryId);
+      srcCarry.value = String(newSrcDigit);
+      srcCarry.classList.add('carry-bounce');
+      setTimeout(() => srcCarry.classList.remove('carry-bounce'), 500);
+    }, 400);
+
+    // Fly a "1" from source to dest carry cell
+    setTimeout(() => {
+      const srcEl = document.getElementById(srcMinuendId);
+      const destCarry = document.getElementById(destCarryId);
+      const srcRect = srcEl.getBoundingClientRect();
+      const destRect = destCarry.getBoundingClientRect();
+
+      const floater = document.createElement('div');
+      floater.className = 'floating-digit';
+      floater.textContent = '1';
+      floater.style.left = (srcRect.left + srcRect.width / 2 - 10) + 'px';
+      floater.style.top = (srcRect.top - 15) + 'px';
+      document.body.appendChild(floater);
+
+      void floater.offsetWidth;
+      floater.style.left = (destRect.left + destRect.width / 2 - 10) + 'px';
+      floater.style.top = (destRect.top + destRect.height / 2 - 12) + 'px';
+      floater.style.fontSize = '1.1rem';
+
+      floater.addEventListener('transitionend', () => {
+        floater.remove();
+        destCarry.value = '1';
+        destCarry.classList.add('carry-bounce');
+        setTimeout(() => destCarry.classList.remove('carry-bounce'), 500);
+        resolve();
+      }, { once: true });
+    }, 800);
+  });
+}
 
 // ═══════════════════════════════════════════
 // Blocks
@@ -766,6 +1052,7 @@ async function doTakeAway() {
   }
 
   setState({ animating: true });
+  setNarration("Let's take away the blocks!");
 
   const sub = digits(state.num2);
   const mm = state.minuendMod;
@@ -790,6 +1077,7 @@ async function doTakeAway() {
   await removeFromColumn('mat-a1-h', '.block.flat', sub.hundreds);
 
   await wait(300);
+  setNarration("Now let's see what's left!");
 
   // Move remaining blocks to result row
   const resultOnes = mm.ones - sub.ones;
@@ -811,7 +1099,8 @@ async function doTakeAway() {
     b.style.animationDelay = `${i * 0.03}s`;
   });
 
-  await wait(600);
+  await wait(1200);
+  clearNarration();
   updateCountBar();
   setState({ phase: 'mat-done', animating: false });
 }
@@ -826,39 +1115,64 @@ async function doBorrow() {
   const sub = digits(state.num2);
 
   if (state.phase === 'borrowing-tens') {
-    // Borrow from hundreds into tens: flat → 10 rods
     await borrowColumn('mat-a1-h', '.block.flat', 'mat-a1-t', 'rod', 10,
-      () => { state.minuendMod.hundreds -= 1; state.minuendMod.tens += 10; state.borrows.hundreds = 1; }
+      () => { state.minuendMod.hundreds -= 1; state.minuendMod.tens += 10; state.borrows.hundreds = 1; },
+      { need: sub.tens, have: state.minuendMod.tens,
+        srcColName: 'hundreds', destColName: 'tens',
+        conversion: '1 hundred = 10 tens!',
+        newTotal: state.minuendMod.tens + 10, needVal: sub.tens,
+        srcMinuendCell: 'g-a1-h', srcCarryCell: 'carry-h', destCarryCell: 'carry-t',
+        newSrcDigit: state.minuendMod.hundreds - 1 }
     );
-    // After borrowing into tens, check if we still need to borrow for ones
     const nextPhase = determineBorrowPhase(state.minuendMod, sub);
     setState({ phase: nextPhase, animating: false });
   } else if (state.phase === 'borrowing-ones') {
-    // Borrow from tens into ones: rod → 10 units
     await borrowColumn('mat-a1-t', '.block.rod', 'mat-a1-o', 'unit', 10,
-      () => { state.minuendMod.tens -= 1; state.minuendMod.ones += 10; state.borrows.tens = 1; }
+      () => { state.minuendMod.tens -= 1; state.minuendMod.ones += 10; state.borrows.tens = 1; },
+      { need: sub.ones, have: state.minuendMod.ones,
+        srcColName: 'tens', destColName: 'ones',
+        conversion: '1 ten = 10 ones!',
+        newTotal: state.minuendMod.ones + 10, needVal: sub.ones,
+        srcMinuendCell: 'g-a1-t', srcCarryCell: 'carry-t', destCarryCell: 'carry-o',
+        newSrcDigit: state.minuendMod.tens - 1 }
     );
     const nextPhase = determineBorrowPhase(state.minuendMod, sub);
     setState({ phase: nextPhase, animating: false });
   }
 }
 
-async function borrowColumn(srcId, srcSel, destId, newType, count, updateFn) {
+async function borrowColumn(srcId, srcSel, destId, newType, count, updateFn, narr) {
   const src = document.getElementById(srcId);
   const blocks = Array.from(src.querySelectorAll(srcSel));
   if (blocks.length === 0) return;
 
-  // Highlight the block being decomposed
-  const block = blocks[blocks.length - 1]; // take last one
+  // Step 1: "Not enough!" narration
+  setNarration(`We need ${narr.need} ${narr.destColName} but only have ${narr.have}. Not enough!`);
+  playSfx('boop');
+  await wait(2500);
+
+  // Step 2: "Let's borrow"
+  setNarration(`Let's borrow from the ${narr.srcColName} column.`);
+  await wait(1500);
+
+  // Step 3: Highlight the block being decomposed
+  const block = blocks[blocks.length - 1];
   cleanAnimClasses(block); void block.offsetWidth;
   block.classList.add('highlight');
   await wait(800);
 
-  // Shrink it away
+  // Step 4: Conversion narration + arrow
+  setNarration(narr.conversion);
+  const arrow = showMovementArrow(srcId, destId);
+  playSfx('snap');
+  await wait(1500);
+
+  // Step 5: Shrink away the block
   await animateElement(block, 'shrink-away');
   block.remove();
+  await wait(300);
 
-  // Pop in new blocks in destination
+  // Step 6: Pop in new blocks
   const dest = document.getElementById(destId);
   for (let i = 0; i < count; i++) {
     const nb = document.createElement('div');
@@ -866,9 +1180,26 @@ async function borrowColumn(srcId, srcSel, destId, newType, count, updateFn) {
     nb.style.animationDelay = `${i * 0.04}s`;
     dest.appendChild(nb);
   }
-
+  playSfx('pop');
   updateFn();
-  await wait(500);
+  await wait(600);
+
+  // Step 6.5: Galera borrow animation (strike-through + flying digit)
+  await animateBorrowInGalera(narr.srcMinuendCell, narr.srcCarryCell, narr.destCarryCell, narr.newSrcDigit);
+  await wait(400);
+
+  // Step 7: Remove arrow
+  arrow.remove();
+
+  // Step 8: "Now we have enough!" narration
+  setNarration(`Now we have ${narr.newTotal} ${narr.destColName}! That's enough to take away ${narr.needVal}.`);
+  playSfx('ding');
+  await wait(2500);
+
+  // Step 9: Clear narration
+  clearNarration();
+  await wait(300);
+
   updateCountBar();
 }
 
@@ -896,7 +1227,7 @@ function checkAnswer() {
 // Celebration / Hint / Audio
 // ═══════════════════════════════════════════
 function celebrate() {
-  playChime(); showConfetti();
+  playChime(); playSfx('ding'); showConfetti();
   const ov = document.getElementById('feedbackOverlay');
   ov.innerHTML = '<div class="feedback-message">Great job!</div>';
   ov.classList.add('show');
@@ -923,6 +1254,7 @@ function showConfetti() {
 }
 function clearConfetti() { document.querySelectorAll('.confetti-piece').forEach(e => e.remove()); }
 function showHint() {
+  playSfx('boop');
   document.querySelectorAll('.hint-toast').forEach(e => e.remove());
   const t = document.createElement('div'); t.className = 'hint-toast';
   t.textContent = 'Count the remaining blocks in each column and try again!';
@@ -930,6 +1262,7 @@ function showHint() {
   setTimeout(() => { t.classList.add('fade-out'); t.addEventListener('animationend', () => t.remove(), { once: true }); }, 2500);
 }
 function playChime() {
+  if (narrationState.muted) return;
   try {
     const ctx = new (window.AudioContext || window.webkitAudioContext)();
     [523.25, 659.25, 783.99].forEach((f, i) => {
@@ -947,6 +1280,7 @@ function playChime() {
 // New Problem / Reset
 // ═══════════════════════════════════════════
 function resetToInput() {
+  clearNarration(); removeMovementArrows(); clearGaleraStrikes();
   clearGaleraResults();
   state.phase = 'input';
   state.borrows = { tens: 0, hundreds: 0 };
@@ -957,7 +1291,7 @@ function resetToInput() {
 function newProblem() {
   const {a, b} = generateProblem();
   const wasGuide = !!state.guide;
-  clearConfetti();
+  clearNarration(); removeMovementArrows(); clearGaleraStrikes(); clearConfetti();
   document.getElementById('feedbackOverlay').classList.remove('show');
   document.querySelectorAll('.hint-toast').forEach(e => e.remove());
   state.num1 = a; state.num2 = b;
@@ -1004,6 +1338,7 @@ function checkGuideStep() {
   const val=G[key].value;
   if (val==='') return;
   if (parseInt(val)===info.result) {
+    playSfx('ding');
     G[key].classList.remove('incorrect'); G[key].classList.add('correct');
     setTimeout(()=>{
       let next;
@@ -1015,6 +1350,7 @@ function checkGuideStep() {
       else { const nk=next==='tens'?'rt':'rh'; G[nk].focus(); }
     },500);
   } else {
+    playSfx('boop');
     G[key].classList.remove('correct'); G[key].classList.add('incorrect');
     showHint();
   }
@@ -1122,6 +1458,13 @@ document.getElementById('btnCheck').addEventListener('click', () => {
 document.getElementById('difficultySelect').addEventListener('change', function() {
   state.difficulty = this.value;
 });
+document.getElementById('btnMute').addEventListener('click', function(){
+  narrationState.muted = !narrationState.muted;
+  this.textContent = narrationState.muted ? '\u{1F507}' : '\u{1F50A}';
+  if (narrationState.muted) { speechSynthesis.cancel(); document.getElementById('narrationIcon').classList.remove('speaking'); }
+});
+// Load voices for TTS
+if (speechSynthesis.onvoiceschanged !== undefined) speechSynthesis.onvoiceschanged = () => {};
 
 // ═══════════════════════════════════════════
 // Init
