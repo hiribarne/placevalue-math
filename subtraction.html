@@ -726,20 +726,20 @@ function removeMovementArrows() {
 // ═══════════════════════════════════════════
 function addStrikeThrough(cellId) {
   const el = document.getElementById(cellId);
-  const rect = el.getBoundingClientRect();
+  const wrap = el.closest('.galera-cell-wrap');
   const line = document.createElement('div');
   line.className = 'galera-strike';
-  line.style.position = 'fixed';
-  line.style.top = (rect.top + rect.height / 2) + 'px';
-  line.style.left = (rect.left + rect.width * 0.1) + 'px';
+  line.style.position = 'absolute';
+  line.style.top = '50%';
+  line.style.left = '10%';
   line.style.width = '0';
   line.style.height = '3px';
   line.style.background = 'var(--color-accent)';
   line.style.borderRadius = '2px';
   line.style.transform = 'translateY(-50%) rotate(-15deg)';
-  document.body.appendChild(line);
+  wrap.appendChild(line);
   void line.offsetWidth;
-  line.style.width = (rect.width * 0.8) + 'px';
+  line.style.width = '80%';
   return line;
 }
 function clearGaleraStrikes() {
