@@ -74,30 +74,32 @@ body {
 
 /* ── Main Layout ── */
 .main {
-  display: flex; gap: 24px; padding: 20px;
-  max-width: 1200px; margin: 0 auto; align-items: flex-start;
+  display: flex; flex-direction: column; align-items: center;
+  gap: 24px; padding: 20px;
+  max-width: 700px; margin: 0 auto;
 }
 
 /* ── Galera Section ── */
 .galera-section {
-  flex: 1; display: flex; flex-direction: column; align-items: center; gap: 16px;
+  display: flex; flex-direction: column; align-items: center; gap: 16px;
+  width: 100%;
 }
 .galera {
   background: var(--color-galera-bg); border: 2px solid var(--color-border);
-  border-radius: 10px; padding: 20px; display: inline-block;
+  border-radius: 14px; padding: 28px 32px; display: inline-block;
 }
-.galera-row { display: flex; align-items: center; gap: 4px; margin-bottom: 4px; }
+.galera-row { display: flex; align-items: center; gap: 8px; margin-bottom: 6px; }
 .galera-row.carry-row { margin-bottom: 2px; }
 .galera-row.divider {
-  border-bottom: 3px solid var(--color-text); padding-bottom: 6px; margin-bottom: 6px;
+  border-bottom: 3px solid var(--color-text); padding-bottom: 8px; margin-bottom: 8px;
 }
 .galera-label {
-  width: 24px; text-align: center; font-size: 1.3rem;
+  width: 32px; text-align: center; font-size: 1.6rem;
   font-weight: 700; color: var(--color-light-text);
 }
 .galera-cell {
-  width: 56px; height: 56px; border: 2px solid var(--color-border);
-  border-radius: 6px; text-align: center; font-size: 1.7rem; font-weight: 700;
+  width: 72px; height: 72px; border: 2px solid var(--color-border);
+  border-radius: 8px; text-align: center; font-size: 2.2rem; font-weight: 700;
   font-family: 'Courier New', monospace; background: #fff;
   color: var(--color-text); outline: none;
   -webkit-appearance: none; appearance: none;
@@ -106,9 +108,9 @@ body {
   border-color: var(--color-header); box-shadow: 0 0 0 3px rgba(91,74,138,0.2);
 }
 .galera-cell.readonly { background: #f5f5f5; cursor: default; }
-.galera-carry-slot { width: 56px; display: flex; justify-content: center; }
+.galera-carry-slot { width: 72px; display: flex; justify-content: center; }
 .galera-cell.carry {
-  width: 36px; height: 36px; font-size: 1.1rem; font-weight: 700;
+  width: 44px; height: 44px; font-size: 1.3rem; font-weight: 700;
   border: 2px solid #d4b896; color: var(--color-accent); background: #FFF8F0;
 }
 .galera-cell.carry:focus {
@@ -124,7 +126,8 @@ body {
   75% { transform: translateX(4px); }
 }
 .galera-col-header {
-  text-align: center; font-size: 0.7rem; color: var(--color-light-text); width: 56px;
+  text-align: center; font-size: 0.85rem; color: var(--color-light-text); width: 72px;
+  font-weight: 600;
 }
 
 /* Check button */
@@ -153,21 +156,54 @@ body {
 .guide-prompt {
   background: #6C5CE7; color: #fff; padding: 12px 20px; border-radius: 10px;
   font-size: 1.15rem; font-weight: 600; text-align: center;
-  width: 100%; max-width: 320px; display: none; line-height: 1.4;
+  width: 100%; max-width: 380px; display: none; line-height: 1.4;
+  align-items: center; gap: 10px; justify-content: center;
 }
-.guide-prompt.show { display: block; }
+.guide-prompt.show { display: flex; }
+#guideInput {
+  width: 60px; height: 44px; text-align: center; font-size: 1.4rem;
+  font-weight: 700; font-family: 'Courier New', monospace;
+  border: 2px solid rgba(255,255,255,0.4); border-radius: 8px;
+  background: #fff; color: var(--color-text); outline: none;
+  -webkit-appearance: none; appearance: none; flex-shrink: 0;
+}
+#guideInput:focus {
+  border-color: #fff; box-shadow: 0 0 0 3px rgba(255,255,255,0.3);
+}
+#guideInput.correct { border-color: var(--color-success); background: #F0FFF0; }
+#guideInput.incorrect {
+  border-color: var(--color-accent); background: #FFF0F0; animation: shake 0.4s ease;
+}
 .galera-cell.guide-active {
   border-color: #6C5CE7 !important;
   box-shadow: 0 0 0 3px rgba(108,92,231,0.25) !important;
 }
+.galera-cell-wrap { position: relative; }
+.borrow-indicator {
+  position: absolute; top: 4px; left: 6px;
+  font-size: 0.85rem; font-weight: 800; color: var(--color-accent);
+  font-family: 'Courier New', monospace; pointer-events: none;
+  z-index: 5; line-height: 1;
+}
+.guide-borrow-btn {
+  background: #fff; color: #6C5CE7; border: 2px solid rgba(255,255,255,0.4);
+  border-radius: 8px; padding: 8px 18px; font-size: 1.1rem; font-weight: 700;
+  cursor: pointer; min-height: 44px; flex-shrink: 0;
+  animation: borrowBtnPulse 1.2s ease infinite;
+}
+.guide-borrow-btn:active { transform: scale(0.95); }
+@keyframes borrowBtnPulse {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(255,255,255,0.6); }
+  50% { box-shadow: 0 0 0 6px rgba(255,255,255,0); }
+}
 
 /* ── Mat Section (collapsible) ── */
-.mat-section { display: flex; flex-direction: column; gap: 0; flex: 0.85; }
+.mat-section { display: flex; flex-direction: column; gap: 0; width: 100%; }
 .mat-toggle {
   display: flex; align-items: center; justify-content: center; gap: 8px;
   background: var(--color-mat-header); border: 2px solid #c4b89a;
-  border-radius: 10px 10px 0 0; padding: 10px 16px; cursor: pointer;
-  font-size: 0.85rem; font-weight: 700; color: var(--color-text);
+  border-radius: 10px 10px 0 0; padding: 12px 16px; cursor: pointer;
+  font-size: 0.9rem; font-weight: 700; color: var(--color-text);
   user-select: none; -webkit-user-select: none;
 }
 .mat-toggle .arrow {
@@ -383,16 +419,23 @@ body {
   :root { --unit-size:22px; --rod-width:22px; --rod-height:110px; --flat-size:110px; }
   .header { padding: 10px 14px; gap: 8px; }
   .header h1 { font-size: 1.1rem; width: 100%; }
-  .main { flex-direction: column; padding: 12px; gap: 16px; align-items: center; }
-  .galera-section { width: 100%; align-items: center; }
-  .mat-section { width: 100%; }
+  .main { padding: 12px; gap: 16px; }
+  .galera { padding: 20px; }
+  .galera-cell { width: 60px; height: 60px; font-size: 1.9rem; }
+  .galera-carry-slot { width: 60px; }
+  .galera-cell.carry { width: 38px; height: 38px; font-size: 1.1rem; }
+  .galera-col-header { width: 60px; }
+  .galera-row { gap: 6px; }
+  .galera-label { width: 28px; font-size: 1.4rem; }
 }
 @media (max-width: 480px) {
   :root { --unit-size:18px; --rod-width:18px; --rod-height:90px; --flat-size:90px; }
-  .galera-cell { width: 46px; height: 46px; font-size: 1.4rem; }
-  .galera-carry-slot { width: 46px; }
-  .galera-cell.carry { width: 30px; height: 30px; font-size: 0.9rem; }
-  .galera-col-header { width: 46px; }
+  .galera-cell { width: 50px; height: 50px; font-size: 1.5rem; }
+  .galera-carry-slot { width: 50px; }
+  .galera-cell.carry { width: 32px; height: 32px; font-size: 1rem; }
+  .galera-col-header { width: 50px; }
+  .galera-row { gap: 4px; }
+  .galera-label { width: 24px; font-size: 1.3rem; }
   .btn { padding: 10px 16px; font-size: 0.95rem; }
   .btn-check { font-size: 1.05rem; padding: 12px 28px; }
 }
@@ -415,25 +458,10 @@ body {
   0%, 100% { transform: translateY(0); }
   50% { transform: translateY(-4px); }
 }
-.narration-icon.speaking {
-  animation: iconPulse 0.5s ease infinite;
-}
-@keyframes iconPulse {
-  0%, 100% { transform: scale(1); }
-  50% { transform: scale(1.15); }
-}
 .narration-text {
   flex: 1; font-size: 1.15rem; font-weight: 600;
   line-height: 1.3; transition: opacity 0.3s ease;
 }
-.narration-mute {
-  background: rgba(255,255,255,0.2); border: none; border-radius: 8px;
-  padding: 6px 10px; font-size: 1.3rem; cursor: pointer;
-  flex-shrink: 0; min-height: 40px; min-width: 40px;
-  display: flex; align-items: center; justify-content: center;
-}
-.narration-mute:active { transform: scale(0.9); }
-
 /* ── Movement Arrows ── */
 .movement-arrow {
   position: absolute; top: 0; left: 0;
@@ -488,7 +516,7 @@ body {
     <option value="hard">Hard</option>
   </select>
   <button class="btn-new" id="btnNew">New Problem</button>
-  <button class="btn-guide header-btn" id="btnGuide">Guide Me</button>
+  <button class="btn-guide header-btn active" id="btnGuide">Guide: On</button>
 </div>
 
 <div class="main">
@@ -510,9 +538,9 @@ body {
       </div>
       <div class="galera-row">
         <div class="galera-label"></div>
-        <input class="galera-cell" id="g-a1-h" maxlength="1" inputmode="numeric" aria-label="Minuend hundreds">
-        <input class="galera-cell" id="g-a1-t" maxlength="1" inputmode="numeric" aria-label="Minuend tens">
-        <input class="galera-cell" id="g-a1-o" maxlength="1" inputmode="numeric" aria-label="Minuend ones">
+        <div class="galera-cell-wrap"><input class="galera-cell" id="g-a1-h" maxlength="1" inputmode="numeric" aria-label="Minuend hundreds"></div>
+        <div class="galera-cell-wrap"><input class="galera-cell" id="g-a1-t" maxlength="1" inputmode="numeric" aria-label="Minuend tens"></div>
+        <div class="galera-cell-wrap"><input class="galera-cell" id="g-a1-o" maxlength="1" inputmode="numeric" aria-label="Minuend ones"></div>
       </div>
       <div class="galera-row divider">
         <div class="galera-label">&minus;</div>
@@ -527,11 +555,14 @@ body {
         <input class="galera-cell" id="g-r-o" maxlength="1" inputmode="numeric" aria-label="Result ones">
       </div>
     </div>
-    <div class="guide-prompt" id="guidePrompt"></div>
+    <div class="guide-prompt" id="guidePrompt">
+      <span id="guideText"></span>
+      <input type="text" id="guideInput" inputmode="numeric" autocomplete="off">
+      <button id="guideBorrowBtn" class="guide-borrow-btn">Borrow</button>
+    </div>
     <div class="narration-bar" id="narrationBar">
       <div class="narration-icon" id="narrationIcon">&#x1F9D1;&#x200D;&#x1F3EB;</div>
       <div class="narration-text" id="narrationText"></div>
-      <button class="narration-mute" id="btnMute" aria-label="Toggle sound">&#x1F50A;</button>
     </div>
     <div class="galera-buttons">
       <button class="btn-clear" id="btnClear">Clear</button>
@@ -542,7 +573,7 @@ body {
   <!-- Mat (collapsible) -->
   <div class="mat-section" id="matSection">
     <div class="mat-toggle" id="matToggle">
-      <span class="arrow">&#9660;</span> Visual Blocks
+      <span class="arrow">&#9660;</span> Need help? Use Visual Blocks
     </div>
     <div class="mat-body">
       <div class="mat" id="theMat">
@@ -592,15 +623,16 @@ const state = {
   borrows: { tens: 0, hundreds: 0 },
   animating: false,
   answered: false,
-  matCollapsed: false,
+  matCollapsed: true,
   // Modified minuend digits after borrowing
   minuendMod: { ones: 0, tens: 0, hundreds: 0 },
-  guide: null, // null | 'ones' | 'tens' | 'hundreds' | 'done'
+  guide: 'ones', // null | 'ones' | 'tens' | 'hundreds' | 'done'
+  guideEnabled: true, // whether guide mode is on
+  guideBorrowsPending: null, // borrows array waiting for student to click Borrow
 };
 
 function setState(u) { Object.assign(state, u); render(); }
 
-const narrationState = { muted: false };
 
 // ═══════════════════════════════════════════
 // Helpers
@@ -620,82 +652,18 @@ function wait(ms) { return new Promise(r => setTimeout(r, ms)); }
 // ═══════════════════════════════════════════
 // Narration & Audio
 // ═══════════════════════════════════════════
-function speakText(text) {
-  if (narrationState.muted) return;
-  speechSynthesis.cancel();
-  const u = new SpeechSynthesisUtterance(text);
-  u.rate = 0.85; u.pitch = 1.1;
-  const voices = speechSynthesis.getVoices();
-  const pref = voices.find(v => v.name.includes('Samantha') || v.name.includes('Google US English'));
-  if (pref) u.voice = pref;
-  const icon = document.getElementById('narrationIcon');
-  u.onstart = () => icon.classList.add('speaking');
-  u.onend = () => icon.classList.remove('speaking');
-  speechSynthesis.speak(u);
-}
 function setNarration(text) {
   const bar = document.getElementById('narrationBar');
   const textEl = document.getElementById('narrationText');
   textEl.style.opacity = '0';
   bar.classList.add('visible');
   setTimeout(() => { textEl.textContent = text; textEl.style.opacity = '1'; }, 200);
-  if (!narrationState.muted) speakText(text);
 }
 function clearNarration() {
   const bar = document.getElementById('narrationBar');
   const textEl = document.getElementById('narrationText');
   textEl.style.opacity = '0';
-  speechSynthesis.cancel();
-  document.getElementById('narrationIcon').classList.remove('speaking');
   setTimeout(() => { textEl.textContent = ''; bar.classList.remove('visible'); }, 300);
-}
-function playSfx(type) {
-  if (narrationState.muted) return;
-  try {
-    const ctx = new (window.AudioContext || window.webkitAudioContext)();
-    const now = ctx.currentTime;
-    const o = ctx.createOscillator(), g = ctx.createGain();
-    if (type === 'swoosh') {
-      o.type = 'sawtooth';
-      o.frequency.setValueAtTime(800, now);
-      o.frequency.exponentialRampToValueAtTime(200, now + 0.3);
-      g.gain.setValueAtTime(0.12, now);
-      g.gain.exponentialRampToValueAtTime(0.001, now + 0.3);
-      o.connect(g); g.connect(ctx.destination);
-      o.start(now); o.stop(now + 0.3);
-    } else if (type === 'pop') {
-      o.type = 'sine';
-      o.frequency.setValueAtTime(600, now);
-      o.frequency.exponentialRampToValueAtTime(200, now + 0.15);
-      g.gain.setValueAtTime(0.2, now);
-      g.gain.exponentialRampToValueAtTime(0.001, now + 0.15);
-      o.connect(g); g.connect(ctx.destination);
-      o.start(now); o.stop(now + 0.15);
-    } else if (type === 'snap') {
-      o.type = 'square';
-      o.frequency.setValueAtTime(1200, now);
-      o.frequency.exponentialRampToValueAtTime(100, now + 0.2);
-      g.gain.setValueAtTime(0.15, now);
-      g.gain.exponentialRampToValueAtTime(0.001, now + 0.2);
-      o.connect(g); g.connect(ctx.destination);
-      o.start(now); o.stop(now + 0.2);
-    } else if (type === 'ding') {
-      o.type = 'sine';
-      o.frequency.setValueAtTime(880, now);
-      g.gain.setValueAtTime(0.15, now);
-      g.gain.exponentialRampToValueAtTime(0.001, now + 0.5);
-      o.connect(g); g.connect(ctx.destination);
-      o.start(now); o.stop(now + 0.5);
-    } else if (type === 'boop') {
-      o.type = 'sine';
-      o.frequency.setValueAtTime(400, now);
-      o.frequency.exponentialRampToValueAtTime(200, now + 0.25);
-      g.gain.setValueAtTime(0.15, now);
-      g.gain.exponentialRampToValueAtTime(0.001, now + 0.25);
-      o.connect(g); g.connect(ctx.destination);
-      o.start(now); o.stop(now + 0.25);
-    }
-  } catch(e) {}
 }
 
 // ═══════════════════════════════════════════
@@ -816,6 +784,44 @@ function animateBorrowInGalera(srcMinuendId, srcCarryId, destCarryId, newSrcDigi
     }, 800);
   });
 }
+function animateGuideBorrowInGalera(srcMinuendId, srcCarryId, destMinuendId, newSrcDigit) {
+  return new Promise(resolve => {
+    addStrikeThrough(srcMinuendId);
+    setTimeout(() => {
+      const srcCarry = document.getElementById(srcCarryId);
+      srcCarry.value = String(newSrcDigit);
+      srcCarry.classList.add('carry-bounce');
+      setTimeout(() => srcCarry.classList.remove('carry-bounce'), 500);
+    }, 400);
+    setTimeout(() => {
+      const srcEl = document.getElementById(srcMinuendId);
+      const destEl = document.getElementById(destMinuendId);
+      const srcRect = srcEl.getBoundingClientRect();
+      const destRect = destEl.getBoundingClientRect();
+      const floater = document.createElement('div');
+      floater.className = 'floating-digit';
+      floater.textContent = '1';
+      floater.style.left = (srcRect.left + srcRect.width / 2 - 10) + 'px';
+      floater.style.top = (srcRect.top - 15) + 'px';
+      document.body.appendChild(floater);
+      void floater.offsetWidth;
+      floater.style.left = (destRect.left + 6) + 'px';
+      floater.style.top = (destRect.top + 4) + 'px';
+      floater.style.fontSize = '0.85rem';
+      floater.addEventListener('transitionend', () => {
+        floater.remove();
+        const wrap = destEl.closest('.galera-cell-wrap');
+        if (wrap) {
+          const indicator = document.createElement('span');
+          indicator.className = 'borrow-indicator';
+          indicator.textContent = '1';
+          wrap.appendChild(indicator);
+        }
+        resolve();
+      }, { once: true });
+    }, 800);
+  });
+}
 
 // ═══════════════════════════════════════════
 // Blocks
@@ -894,10 +900,14 @@ function setGaleraValues() {
   G.a1h.value = d1.hundreds; G.a1t.value = d1.tens; G.a1o.value = d1.ones;
   G.a2h.value = d2.hundreds; G.a2t.value = d2.tens; G.a2o.value = d2.ones;
 }
+function clearBorrowIndicators() {
+  document.querySelectorAll('.borrow-indicator').forEach(el => el.remove());
+}
 function clearGaleraResults() {
   G.rh.value=''; G.rt.value=''; G.ro.value='';
   G.ch.value=''; G.ct.value=''; G.co.value='';
   ['rh','rt','ro'].forEach(k => G[k].classList.remove('correct','incorrect'));
+  clearBorrowIndicators();
 }
 function lockInputs(keys, lock) {
   keys.forEach(k => { G[k].readOnly = lock; G[k].classList.toggle('readonly', lock); });
@@ -969,19 +979,34 @@ function render() {
 
   // Guide rendering
   const guideEl = document.getElementById('guidePrompt');
+  const guideTextEl = document.getElementById('guideText');
+  const guideInput = document.getElementById('guideInput');
+  const borrowBtn = document.getElementById('guideBorrowBtn');
   const btnGuide = document.getElementById('btnGuide');
   ['ro','rt','rh'].forEach(k => G[k].classList.remove('guide-active'));
   if (state.guide && state.guide !== 'done') {
-    guideEl.textContent = getGuidePrompt();
+    guideTextEl.textContent = getGuidePrompt();
     guideEl.classList.add('show');
     btnGuide.classList.add('active');
     btnGuide.textContent = 'Guide: On';
     const key = state.guide === 'ones' ? 'ro' : state.guide === 'tens' ? 'rt' : 'rh';
     G[key].classList.add('guide-active');
+    // Lock result + carry cells during guide mode
+    lockInputs(['rh','rt','ro'], true);
+    lockInputs(['ch','ct','co'], true);
+    // Toggle borrow button vs guide input
+    const hasPendingBorrows = state.guideBorrowsPending && state.guideBorrowsPending.length > 0;
+    guideInput.style.display = hasPendingBorrows ? 'none' : '';
+    borrowBtn.style.display = hasPendingBorrows ? 'inline-block' : 'none';
   } else {
     guideEl.classList.remove('show');
-    btnGuide.classList.remove('active');
-    btnGuide.textContent = 'Guide Me';
+    borrowBtn.style.display = 'none';
+    btnGuide.classList.toggle('active', state.guideEnabled);
+    btnGuide.textContent = state.guideEnabled ? 'Guide: On' : 'Guide: Off';
+    // Unlock carry cells when guide is off
+    if (!state.guideEnabled || state.guide === 'done') {
+      lockInputs(['ch','ct','co'], false);
+    }
   }
 }
 
@@ -1148,7 +1173,7 @@ async function borrowColumn(srcId, srcSel, destId, newType, count, updateFn, nar
 
   // Step 1: "Not enough!" narration
   setNarration(`We need ${narr.need} ${narr.destColName} but only have ${narr.have}. Not enough!`);
-  playSfx('boop');
+
   await wait(2500);
 
   // Step 2: "Let's borrow"
@@ -1164,7 +1189,7 @@ async function borrowColumn(srcId, srcSel, destId, newType, count, updateFn, nar
   // Step 4: Conversion narration + arrow
   setNarration(narr.conversion);
   const arrow = showMovementArrow(srcId, destId);
-  playSfx('snap');
+
   await wait(1500);
 
   // Step 5: Shrink away the block
@@ -1180,7 +1205,7 @@ async function borrowColumn(srcId, srcSel, destId, newType, count, updateFn, nar
     nb.style.animationDelay = `${i * 0.04}s`;
     dest.appendChild(nb);
   }
-  playSfx('pop');
+
   updateFn();
   await wait(600);
 
@@ -1193,7 +1218,7 @@ async function borrowColumn(srcId, srcSel, destId, newType, count, updateFn, nar
 
   // Step 8: "Now we have enough!" narration
   setNarration(`Now we have ${narr.newTotal} ${narr.destColName}! That's enough to take away ${narr.needVal}.`);
-  playSfx('ding');
+
   await wait(2500);
 
   // Step 9: Clear narration
@@ -1227,7 +1252,7 @@ function checkAnswer() {
 // Celebration / Hint / Audio
 // ═══════════════════════════════════════════
 function celebrate() {
-  playChime(); playSfx('ding'); showConfetti();
+  showConfetti();
   const ov = document.getElementById('feedbackOverlay');
   ov.innerHTML = '<div class="feedback-message">Great job!</div>';
   ov.classList.add('show');
@@ -1254,51 +1279,45 @@ function showConfetti() {
 }
 function clearConfetti() { document.querySelectorAll('.confetti-piece').forEach(e => e.remove()); }
 function showHint() {
-  playSfx('boop');
+
   document.querySelectorAll('.hint-toast').forEach(e => e.remove());
   const t = document.createElement('div'); t.className = 'hint-toast';
   t.textContent = 'Count the remaining blocks in each column and try again!';
   document.body.appendChild(t);
   setTimeout(() => { t.classList.add('fade-out'); t.addEventListener('animationend', () => t.remove(), { once: true }); }, 2500);
 }
-function playChime() {
-  if (narrationState.muted) return;
-  try {
-    const ctx = new (window.AudioContext || window.webkitAudioContext)();
-    [523.25, 659.25, 783.99].forEach((f, i) => {
-      const o = ctx.createOscillator(), g = ctx.createGain();
-      o.type = 'sine'; o.frequency.value = f;
-      g.gain.setValueAtTime(0.15, ctx.currentTime + i*0.15);
-      g.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + i*0.15 + 0.8);
-      o.connect(g); g.connect(ctx.destination);
-      o.start(ctx.currentTime + i*0.15); o.stop(ctx.currentTime + i*0.15 + 0.8);
-    });
-  } catch(e) {}
-}
-
 // ═══════════════════════════════════════════
 // New Problem / Reset
 // ═══════════════════════════════════════════
 function resetToInput() {
   clearNarration(); removeMovementArrows(); clearGaleraStrikes();
-  clearGaleraResults();
+  clearGaleraResults(); clearBorrowIndicators();
   state.phase = 'input';
   state.borrows = { tens: 0, hundreds: 0 };
   state.minuendMod = { ones: 0, tens: 0, hundreds: 0 };
   state.animating = false; state.answered = false;
+  state.guideBorrowsPending = null;
   renderMatInput(); render();
 }
 function newProblem() {
   const {a, b} = generateProblem();
-  const wasGuide = !!state.guide;
   clearNarration(); removeMovementArrows(); clearGaleraStrikes(); clearConfetti();
   document.getElementById('feedbackOverlay').classList.remove('show');
   document.querySelectorAll('.hint-toast').forEach(e => e.remove());
   state.num1 = a; state.num2 = b;
   resetToInput(); setGaleraValues();
-  if (wasGuide) state.guide = 'ones';
+  state.guide = state.guideEnabled ? 'ones' : null;
+  state.guideBorrowsPending = null;
+  if (state.guide) {
+    const exp = getSubtractionSteps();
+    if (exp.ones.borrows && exp.ones.borrows.length > 0) {
+      state.guideBorrowsPending = exp.ones.borrows;
+    }
+  }
   render();
-  if (wasGuide) G.ro.focus();
+  if (state.guide && !state.guideBorrowsPending) {
+    document.getElementById('guideInput').focus();
+  }
 }
 
 // ═══════════════════════════════════════════
@@ -1308,17 +1327,28 @@ function getSubtractionSteps() {
   const d1=digits(state.num1), d2=digits(state.num2);
   let m={hundreds:d1.hundreds, tens:d1.tens, ones:d1.ones};
   let ob=false, tb=false;
+  const onesBorrows = [];
+  const tensBorrows = [];
   if (m.ones<d2.ones) {
-    if (m.tens>0) { m.tens--; m.ones+=10; ob=true; }
-    else if (m.hundreds>0) { m.hundreds--; m.tens+=9; m.ones+=10; ob=true; tb=true; }
+    if (m.tens>0) {
+      onesBorrows.push({src:'g-a1-t', srcCarry:'carry-t', destMinuend:'g-a1-o', newDigit:m.tens-1});
+      m.tens--; m.ones+=10; ob=true;
+    } else if (m.hundreds>0) {
+      onesBorrows.push({src:'g-a1-h', srcCarry:'carry-h', destMinuend:'g-a1-t', newDigit:m.hundreds-1});
+      onesBorrows.push({src:'g-a1-t', srcCarry:'carry-t', destMinuend:'g-a1-o', newDigit:9});
+      m.hundreds--; m.tens+=9; m.ones+=10; ob=true; tb=true;
+    }
   }
   if (m.tens<d2.tens) {
-    if (m.hundreds>0) { m.hundreds--; m.tens+=10; tb=true; }
+    if (m.hundreds>0) {
+      tensBorrows.push({src:'g-a1-h', srcCarry:'carry-h', destMinuend:'g-a1-t', newDigit:m.hundreds-1});
+      m.hundreds--; m.tens+=10; tb=true;
+    }
   }
   return {
-    ones: {a:m.ones, b:d2.ones, result:m.ones-d2.ones, borrowed:ob, orig:d1.ones},
-    tens: {a:m.tens, b:d2.tens, result:m.tens-d2.tens, borrowed:tb, orig:d1.tens},
-    hundreds: {a:m.hundreds, b:d2.hundreds, result:m.hundreds-d2.hundreds},
+    ones: {a:m.ones, b:d2.ones, result:m.ones-d2.ones, borrowed:ob, orig:d1.ones, borrows:onesBorrows},
+    tens: {a:m.tens, b:d2.tens, result:m.tens-d2.tens, borrowed:tb, orig:d1.tens, borrows:tensBorrows},
+    hundreds: {a:m.hundreds, b:d2.hundreds, result:m.hundreds-d2.hundreds, borrows:[]},
     needsHundreds: d1.hundreds>0 || d2.hundreds>0,
   };
 }
@@ -1326,42 +1356,82 @@ function getGuidePrompt() {
   if (!state.guide || state.guide==='done') return '';
   const exp=getSubtractionSteps(), info=exp[state.guide];
   const col=state.guide.charAt(0).toUpperCase()+state.guide.slice(1);
-  if (info.borrowed) {
-    return col+': '+info.orig+' < '+info.b+' — Borrow! '+info.a+' \u2212 '+info.b+' = ?';
+  if (state.guideBorrowsPending && state.guideBorrowsPending.length > 0) {
+    return col+': '+info.orig+' < '+info.b+' — Need to borrow!';
   }
   return col+': '+info.a+' \u2212 '+info.b+' = ?';
 }
-function checkGuideStep() {
-  if (!state.guide || state.guide==='done') return;
+async function animateGuideBorrows(borrows) {
+  if (!borrows || borrows.length === 0) return;
+  state.animating = true; render();
+  for (const b of borrows) {
+    // Clear any existing borrow indicator on source (for chain borrows)
+    const srcWrap = document.getElementById(b.src)?.closest('.galera-cell-wrap');
+    if (srcWrap) srcWrap.querySelector('.borrow-indicator')?.remove();
+    await animateGuideBorrowInGalera(b.src, b.srcCarry, b.destMinuend, b.newDigit);
+    await wait(400);
+  }
+  state.animating = false; render();
+  document.getElementById('guideInput').focus();
+}
+async function checkGuideStep() {
+  if (!state.guide || state.guide==='done' || state.animating) return;
+  const guideInput = document.getElementById('guideInput');
   const exp=getSubtractionSteps(), step=state.guide, info=exp[step];
   const key = step==='ones'?'ro': step==='tens'?'rt':'rh';
-  const val=G[key].value;
+  const val=guideInput.value;
   if (val==='') return;
   if (parseInt(val)===info.result) {
-    playSfx('ding');
-    G[key].classList.remove('incorrect'); G[key].classList.add('correct');
-    setTimeout(()=>{
-      let next;
-      if (step==='ones') next='tens';
-      else if (step==='tens') next=exp.needsHundreds?'hundreds':'done';
-      else next='done';
-      state.guide=next; render();
-      if (next==='done') { celebrate(); state.answered=true; }
-      else { const nk=next==='tens'?'rt':'rh'; G[nk].focus(); }
-    },500);
+    guideInput.classList.remove('incorrect'); guideInput.classList.add('correct');
+    state.animating = true; render();
+    await wait(500);
+    // Place result digit in galera
+    G[key].value = String(info.result);
+    G[key].classList.add('correct');
+    guideInput.value = '';
+    guideInput.classList.remove('correct','incorrect');
+    state.animating = false;
+    // Advance step
+    let next;
+    if (step==='ones') next='tens';
+    else if (step==='tens') next=exp.needsHundreds?'hundreds':'done';
+    else next='done';
+    state.guide=next; render();
+    if (next==='done') { celebrate(); state.answered=true; }
+    else {
+      // Set pending borrows for next step if needed
+      const nextInfo = exp[next];
+      if (nextInfo && nextInfo.borrows && nextInfo.borrows.length > 0) {
+        state.guideBorrowsPending = nextInfo.borrows;
+        render();
+      } else {
+        guideInput.focus();
+      }
+    }
   } else {
-    playSfx('boop');
-    G[key].classList.remove('correct'); G[key].classList.add('incorrect');
+    guideInput.classList.remove('correct'); guideInput.classList.add('incorrect');
     showHint();
   }
 }
 function toggleGuide() {
-  if (state.guide) { state.guide=null; }
-  else if (state.num1>0 && state.num2>0 && state.num1>=state.num2) {
+  if (state.animating) return;
+  state.guideEnabled = !state.guideEnabled;
+  const guideInput = document.getElementById('guideInput');
+  guideInput.value = '';
+  guideInput.classList.remove('correct','incorrect');
+  clearGaleraStrikes(); clearBorrowIndicators();
+  state.guideBorrowsPending = null;
+  if (!state.guideEnabled) {
+    state.guide = null;
+  } else if (state.num1>0 && state.num2>0 && state.num1>=state.num2 && !state.answered) {
     clearGaleraResults(); state.guide='ones'; state.answered=false;
+    const exp = getSubtractionSteps();
+    if (exp.ones.borrows && exp.ones.borrows.length > 0) {
+      state.guideBorrowsPending = exp.ones.borrows;
+    }
   }
   render();
-  if (state.guide) G.ro.focus();
+  if (state.guide && !state.guideBorrowsPending) guideInput.focus();
 }
 
 // ═══════════════════════════════════════════
@@ -1378,9 +1448,20 @@ function handleOperandInput() {
     clearGaleraResults();
   }
   state.answered = false;
-  if (state.guide) {
+  const guideInput = document.getElementById('guideInput');
+  guideInput.value = '';
+  guideInput.classList.remove('correct','incorrect');
+  clearGaleraStrikes(); clearBorrowIndicators();
+  state.guideBorrowsPending = null;
+  if (state.guideEnabled) {
     state.guide = (state.num1>0 && state.num2>0 && state.num1>=state.num2) ? 'ones' : null;
     clearGaleraResults();
+    if (state.guide) {
+      const exp = getSubtractionSteps();
+      if (exp.ones.borrows && exp.ones.borrows.length > 0) {
+        state.guideBorrowsPending = exp.ones.borrows;
+      }
+    }
   }
   renderMatInput(); render();
 }
@@ -1403,8 +1484,7 @@ function autoAdvance(el) {
   G[k].addEventListener('input', function() {
     this.value = this.value.replace(/[^0-9]/g, '').slice(0, 1);
     this.classList.remove('correct', 'incorrect');
-    if (state.guide) checkGuideStep();
-    else autoAdvance(this);
+    autoAdvance(this);
   });
 });
 // Borrow inputs — editable, filter to digits
@@ -1413,6 +1493,19 @@ function autoAdvance(el) {
     this.value = this.value.replace(/[^0-9]/g, '').slice(0, 1);
     autoAdvance(this);
   });
+});
+// Guide input handler
+document.getElementById('guideInput').addEventListener('input', function(){
+  this.value=this.value.replace(/[^0-9]/g,'').slice(0,2);
+  this.classList.remove('correct','incorrect');
+  if (this.value) checkGuideStep();
+});
+// Guide borrow button handler
+document.getElementById('guideBorrowBtn').addEventListener('click', async () => {
+  if (!state.guideBorrowsPending || state.guideBorrowsPending.length === 0 || state.animating) return;
+  const borrows = state.guideBorrowsPending;
+  state.guideBorrowsPending = null;
+  await animateGuideBorrows(borrows);
 });
 
 // ═══════════════════════════════════════════
@@ -1441,7 +1534,8 @@ document.getElementById('btnClear').addEventListener('click', () => {
   document.querySelectorAll('.hint-toast').forEach(e => e.remove());
   G.a1h.value=''; G.a1t.value=''; G.a1o.value='';
   G.a2h.value=''; G.a2t.value=''; G.a2o.value='';
-  state.num1=0; state.num2=0; state.guide=null;
+  state.num1=0; state.num2=0;
+  state.guide = state.guideEnabled ? 'ones' : null;
   resetToInput(); render();
 });
 document.getElementById('btnNew').addEventListener('click', newProblem);
@@ -1458,14 +1552,6 @@ document.getElementById('btnCheck').addEventListener('click', () => {
 document.getElementById('difficultySelect').addEventListener('change', function() {
   state.difficulty = this.value;
 });
-document.getElementById('btnMute').addEventListener('click', function(){
-  narrationState.muted = !narrationState.muted;
-  this.textContent = narrationState.muted ? '\u{1F507}' : '\u{1F50A}';
-  if (narrationState.muted) { speechSynthesis.cancel(); document.getElementById('narrationIcon').classList.remove('speaking'); }
-});
-// Load voices for TTS
-if (speechSynthesis.onvoiceschanged !== undefined) speechSynthesis.onvoiceschanged = () => {};
-
 // ═══════════════════════════════════════════
 // Init
 // ═══════════════════════════════════════════
