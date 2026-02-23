@@ -385,13 +385,16 @@ body {
 /* ── Feedback ── */
 .feedback-overlay {
   position: fixed; top: 0; left: 0; right: 0; bottom: 0;
-  display: none; align-items: center; justify-content: center;
+  display: none; align-items: flex-start; justify-content: center;
+  padding-top: 18vh;
   z-index: 100; pointer-events: none;
 }
 .feedback-overlay.show { display: flex; }
 .feedback-message {
-  font-size: 2.5rem; font-weight: 800; color: var(--color-success);
-  text-shadow: 2px 2px 8px rgba(0,0,0,0.15); pointer-events: none;
+  font-size: 2.2rem; font-weight: 800; color: #fff;
+  background: var(--color-success); padding: 16px 40px; border-radius: 16px;
+  box-shadow: 0 8px 32px rgba(76,175,80,0.4);
+  pointer-events: none;
   animation: bounceIn 0.6s cubic-bezier(0.34,1.56,0.64,1);
 }
 @keyframes bounceIn { from { transform: scale(0); opacity: 0; } to { transform: scale(1); opacity: 1; } }
@@ -1435,10 +1438,31 @@ function toggleGuide() {
 }
 
 // ═══════════════════════════════════════════
-// Input Handling
+// Input Handling — Calculator-style entry
 // ═══════════════════════════════════════════
-function handleOperandInput() {
-  this.value = this.value.replace(/[^0-9]/g, '').slice(0, 1);
+state.entryTarget = 'a1'; // 'a1' or 'a2' — which operand is being entered
+
+function shiftDigitLeft(prefix) {
+  const h = G[prefix+'h'], t = G[prefix+'t'], o = G[prefix+'o'];
+  h.value = t.value; t.value = o.value; o.value = '';
+}
+function shiftDigitRight(prefix) {
+  const h = G[prefix+'h'], t = G[prefix+'t'], o = G[prefix+'o'];
+  o.value = t.value; t.value = h.value; h.value = '';
+}
+function pushDigit(prefix, digit) {
+  const h = G[prefix+'h'];
+  if (h.value) return; // already 3 digits, ignore
+  shiftDigitLeft(prefix);
+  G[prefix+'o'].value = digit;
+}
+function popDigit(prefix) {
+  const o = G[prefix+'o'];
+  if (!o.value && !G[prefix+'t'].value && !G[prefix+'h'].value) return;
+  o.value = '';
+  shiftDigitRight(prefix);
+}
+function syncStateFromGalera() {
   const { num1, num2 } = readGaleraValues();
   state.num1 = num1; state.num2 = num2;
   if (state.phase !== 'input') {
@@ -1465,33 +1489,70 @@ function handleOperandInput() {
   }
   renderMatInput(); render();
 }
-
-// Auto-advance: move focus to next cell after typing a digit
-const advanceOrder = ['carry-h','carry-t','carry-o','g-a1-h','g-a1-t','g-a1-o','g-a2-h','g-a2-t','g-a2-o','g-r-h','g-r-t','g-r-o'];
-function autoAdvance(el) {
-  if (!el.value) return;
-  const idx = advanceOrder.indexOf(el.id);
-  for (let i = idx + 1; i < advanceOrder.length; i++) {
-    const next = document.getElementById(advanceOrder[i]);
-    if (next && !next.readOnly) { next.focus(); next.select(); return; }
+function confirmAndJump(target) {
+  state.entryTarget = target;
+  G[target+'o'].focus();
+}
+function confirmBothAndStart() {
+  syncStateFromGalera();
+  if (state.num1>0 && state.num2>0 && state.num1>=state.num2) {
+    if (state.guide && !state.guideBorrowsPending) document.getElementById('guideInput').focus();
+    else if (!state.guide) G.ro.focus();
   }
 }
 
-['a1h','a1t','a1o','a2h','a2t','a2o'].forEach(k => {
-  G[k].addEventListener('input', function() { handleOperandInput.call(this); autoAdvance(this); });
+// All addend cells: prevent stale input
+const addendCells = ['a1h','a1t','a1o','a2h','a2t','a2o'];
+addendCells.forEach(k => {
+  G[k].addEventListener('input', function() {
+    this.value = this.value.replace(/[^0-9]/g,'');
+  });
 });
+// Keydown handler on addend cells
+addendCells.forEach(k => {
+  G[k].addEventListener('keydown', function(e) {
+    const prefix = state.entryTarget;
+    if (e.key >= '0' && e.key <= '9') {
+      e.preventDefault();
+      pushDigit(prefix, e.key);
+      syncStateFromGalera();
+      G[prefix+'o'].focus();
+    } else if (e.key === 'Backspace') {
+      e.preventDefault();
+      popDigit(prefix);
+      syncStateFromGalera();
+      G[prefix+'o'].focus();
+    } else if (e.key === 'Enter' || e.key === 'Tab' || e.key === '-') {
+      e.preventDefault();
+      if (prefix === 'a1') {
+        syncStateFromGalera();
+        confirmAndJump('a2');
+      } else {
+        confirmBothAndStart();
+      }
+    } else if (e.key === 'Escape') {
+      e.preventDefault();
+      this.blur();
+    }
+  });
+});
+// Click on any addend cell sets entryTarget to that operand
+addendCells.forEach(k => {
+  G[k].addEventListener('focus', function() {
+    state.entryTarget = k.startsWith('a1') ? 'a1' : 'a2';
+  });
+});
+
 ['rh','rt','ro'].forEach(k => {
   G[k].addEventListener('input', function() {
     this.value = this.value.replace(/[^0-9]/g, '').slice(0, 1);
     this.classList.remove('correct', 'incorrect');
-    autoAdvance(this);
   });
 });
 // Borrow inputs — editable, filter to digits
 ['ch','ct','co'].forEach(k => {
   G[k].addEventListener('input', function() {
     this.value = this.value.replace(/[^0-9]/g, '').slice(0, 1);
-    autoAdvance(this);
   });
 });
 // Guide input handler
@@ -1536,7 +1597,9 @@ document.getElementById('btnClear').addEventListener('click', () => {
   G.a2h.value=''; G.a2t.value=''; G.a2o.value='';
   state.num1=0; state.num2=0;
   state.guide = state.guideEnabled ? 'ones' : null;
+  state.entryTarget = 'a1';
   resetToInput(); render();
+  G.a1o.focus();
 });
 document.getElementById('btnNew').addEventListener('click', newProblem);
 document.getElementById('btnGuide').addEventListener('click', toggleGuide);
