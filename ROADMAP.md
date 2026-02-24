@@ -76,24 +76,24 @@ Each stage builds on the previous one. Tests are written alongside each feature.
 
 ---
 
-## Stage 3 — Engagement & Resilience
+## Stage 3 — Engagement & Resilience ✓
 
 **Goal:** Keep students engaged and support offline/repeated use.
 
-- [ ] **Offline support (Service Worker)**
-  - Add a `sw.js` that caches all HTML/CSS/JS files
-  - Enables usage without internet (tablet at home, classroom without wifi)
-  - Register from index.html
+- [x] **Offline support (Service Worker)**
+  - Added `sw.js` that caches all HTML files with stale-while-revalidate
+  - Registered from index.html, addition.html, and subtraction.html
+  - Updated deployment workflow to include sw.js
 
-- [ ] **Discoverable "enter your own" mode**
-  - Add a small label/hint near the galera: "Type your own problem or press New"
-  - Many users may not realize they can type custom numbers
-  - Show on first visit, hide after first custom entry (localStorage)
+- [x] **Discoverable "enter your own" mode**
+  - Added hint label below galera: "Type your own numbers or press New"
+  - Shown on first visit, hidden after first custom digit entry (localStorage)
+  - Fade-out animation on dismiss
 
-- [ ] **Undo/confirm on destructive actions**
-  - "New Problem" and "Clear" can lose student work
-  - Add a brief undo toast: "Problem cleared. Undo?" (3 second window)
-  - Or require confirmation if student has partially filled answers
+- [x] **Undo/confirm on destructive actions**
+  - Clear and New Problem show undo toast when student has partial work
+  - 3-second undo window with dark toast and Undo button
+  - Snapshot/restore mechanism preserves all galera cell values and state
 
 ---
 
@@ -130,7 +130,7 @@ Each stage builds on the previous one. Tests are written alongside each feature.
 
 Tests live in `tests/` directory and run via Node.js with jsdom.
 
-### Test Files (110 tests)
+### Test Files (129 tests)
 - `tests/helpers.test.js` — digits(), digitDisplay(), randInt() (17 tests)
 - `tests/addition-steps.test.js` — getAdditionSteps(), needsCarry(), carryCount() (14 tests)
 - `tests/subtraction-steps.test.js` — getSubtractionSteps(), needsBorrowCheck(), borrowCount(), determineBorrowPhase() (20 tests)
@@ -140,6 +140,7 @@ Tests live in `tests/` directory and run via Node.js with jsdom.
 - `tests/guide-mode.test.js` — guide prompts, borrow pending state, input validation (8 tests)
 - `tests/stage1-improvements.test.js` — Enter-to-check, carry validation (7 tests)
 - `tests/stage2-improvements.test.js` — labels, mat expand, counter, hint fix, ARIA (16 tests)
+- `tests/stage3-improvements.test.js` — service worker, entry hint, undo toast (19 tests)
 
 ---
 
