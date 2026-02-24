@@ -59,11 +59,18 @@ This tool follows the **Concrete → Pictorial → Abstract** (CPA) progression:
 
 The visual blocks section is collapsible — students who are comfortable with the abstract method can hide it, while those who need support can open it at any time.
 
+### Additional Representations
+
+- **Number Line** — A collapsible SVG number line shows the operation as an arc/jump (e.g., start at 23, jump +14 to 37). Bridges between CPA and more abstract models.
+- **Expanded Notation** — A collapsible display showing numbers decomposed by place value (e.g., 345 = 300 + 40 + 5), color-coded to match the block types.
+- **Estimation Prompt** — Before solving each problem, students are asked to estimate the answer. Feedback shows "Close!" or "Not quite!" to build number sense.
+
 ### Difficulty Levels
 
 - **Easy** — No carrying/borrowing required
 - **Medium** — One carry or borrow
 - **Hard** — Multiple carries/borrows, larger numbers
+- **Adaptive suggestions** — After 3 consecutive wrong answers, a banner suggests trying an easier level. After 5 consecutive correct answers, it suggests a harder level. Non-intrusive — students can accept or dismiss.
 
 ## How to Use in the Classroom
 
@@ -73,14 +80,32 @@ The visual blocks section is collapsible — students who are comfortable with t
 4. **Collapse the visual blocks** — students work purely with the column method
 5. **Homework mode** — Clear, type the problem, solve with or without guide, repeat
 
+## Accessibility & Polish
+
+- **ARIA live regions** on guide prompts, narration bar, and feedback overlay for screen reader support
+- **Carry validation** — when checking an addition answer, carry cells are also validated with correct/incorrect feedback
+- **Enter-to-check** — pressing Enter on any result cell triggers Check Answer
+- **Undo on destructive actions** — Clear and New Problem show a 3-second undo toast when student has partial work
+- **Offline support** — a service worker caches all pages for use without internet
+- **Problem counter** — "Solved: N" tracks how many problems have been completed in the session
+
 ## Running Locally
 
 No build step — just open `index.html` in a browser, or serve with any static file server:
 
 ```
-npx serve .
+python3 -m http.server 8080
+```
+
+## Tests
+
+156 tests using Node.js built-in test runner with jsdom:
+
+```
+npm install
+npm test
 ```
 
 ## Tech
 
-Pure HTML, CSS, and JavaScript. No dependencies. Each page is a single self-contained HTML file. Works on desktop and mobile (touch-friendly, large tap targets).
+Pure HTML, CSS, and JavaScript. No build step. Each page is a single self-contained HTML file. Works on desktop and mobile (touch-friendly, large tap targets). Works offline via service worker.
