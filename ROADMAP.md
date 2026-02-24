@@ -97,32 +97,32 @@ Each stage builds on the previous one. Tests are written alongside each feature.
 
 ---
 
-## Stage 4 — Pedagogical Extensions
+## Stage 4 — Pedagogical Extensions ✓
 
 **Goal:** Deepen learning with additional representations and adaptive support.
 
-- [ ] **Number line visualization**
-  - Add a collapsible number line that shows the operation as jumps
-  - Addition: start at first number, jump by second number
-  - Subtraction: start at first number, jump back by second number
-  - Bridges between CPA and more abstract representations
+- [x] **Number line visualization**
+  - Collapsible SVG number line showing the operation as an arc/jump
+  - Addition: start at first number, arc forward by second number (+N label)
+  - Subtraction: start at first number, arc backward by second number (−N label)
+  - Tick marks and labels for key values (0, operand, result)
 
-- [ ] **Expanded notation display**
-  - Show numbers in expanded form alongside the galera
-  - Example: 345 = 300 + 40 + 5
-  - Helps students understand place value decomposition
-  - Toggle on/off independently
+- [x] **Expanded notation display**
+  - Collapsible section showing numbers in expanded form (e.g. 345 = 300 + 40 + 5)
+  - Color-coded by place value (hundreds=orange, tens=green, ones=blue)
+  - Shows both operands and the result with operator symbol
 
-- [ ] **Adaptive difficulty**
-  - Track correct/incorrect ratio per session
-  - Suggest easier difficulty after 3+ consecutive wrong answers
-  - Suggest harder difficulty after 5+ consecutive correct answers
-  - Non-intrusive: suggestion banner, not forced change
+- [x] **Adaptive difficulty**
+  - Tracks consecutive correct/incorrect streak per session
+  - Suggests easier difficulty after 3+ consecutive wrong answers
+  - Suggests harder difficulty after 5+ consecutive correct answers
+  - Purple suggestion banner with accept/dismiss buttons, auto-fades after 8s
 
-- [ ] **Estimation prompts**
-  - Before solving, ask "About how much do you think the answer will be?"
-  - Accept any answer within a reasonable range
-  - Builds number sense and metacognitive skills
+- [x] **Estimation prompts**
+  - Before solving, shows "Estimate:" prompt with input field
+  - Checks if guess is within 20% or 10 of actual answer
+  - Shows "Close!" or "Not quite!" feedback, auto-dismisses after 1.5s
+  - Dismissed when student starts working on the actual problem
 
 ---
 
@@ -130,7 +130,7 @@ Each stage builds on the previous one. Tests are written alongside each feature.
 
 Tests live in `tests/` directory and run via Node.js with jsdom.
 
-### Test Files (129 tests)
+### Test Files (156 tests)
 - `tests/helpers.test.js` — digits(), digitDisplay(), randInt() (17 tests)
 - `tests/addition-steps.test.js` — getAdditionSteps(), needsCarry(), carryCount() (14 tests)
 - `tests/subtraction-steps.test.js` — getSubtractionSteps(), needsBorrowCheck(), borrowCount(), determineBorrowPhase() (20 tests)
@@ -141,6 +141,7 @@ Tests live in `tests/` directory and run via Node.js with jsdom.
 - `tests/stage1-improvements.test.js` — Enter-to-check, carry validation (7 tests)
 - `tests/stage2-improvements.test.js` — labels, mat expand, counter, hint fix, ARIA (16 tests)
 - `tests/stage3-improvements.test.js` — service worker, entry hint, undo toast (19 tests)
+- `tests/stage4-improvements.test.js` — number line, expanded notation, adaptive difficulty, estimation (27 tests)
 
 ---
 

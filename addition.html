@@ -187,6 +187,95 @@ body {
   margin-top: -8px; transition: opacity 0.3s ease;
 }
 
+/* ── Estimation Prompt ── */
+.estimate-prompt {
+  background: #FFF3CD; border: 2px solid #F0D78C; border-radius: 10px;
+  padding: 12px 20px; width: 100%; max-width: 380px; text-align: center;
+  display: none; font-size: 1rem; font-weight: 600; color: #856404;
+  animation: toastIn 0.35s ease;
+}
+.estimate-prompt.show { display: flex; align-items: center; gap: 10px; justify-content: center; }
+.estimate-prompt input {
+  width: 80px; height: 40px; text-align: center; font-size: 1.2rem;
+  font-weight: 700; font-family: 'Courier New', monospace;
+  border: 2px solid #F0D78C; border-radius: 8px; background: #fff;
+  color: var(--color-text); outline: none;
+}
+.estimate-prompt input:focus { border-color: #D4A017; box-shadow: 0 0 0 3px rgba(212,160,23,0.2); }
+.estimate-prompt .estimate-result {
+  font-size: 0.9rem; font-weight: 700; margin-left: 6px;
+}
+.estimate-prompt .estimate-result.close { color: var(--color-success); }
+.estimate-prompt .estimate-result.far { color: var(--color-accent); }
+
+/* ── Adaptive Difficulty Banner ── */
+.difficulty-suggestion {
+  position: fixed; top: 80px; left: 50%; transform: translateX(-50%);
+  background: #6C5CE7; color: #fff; padding: 12px 20px; border-radius: 10px;
+  font-size: 0.95rem; font-weight: 600; box-shadow: 0 4px 16px rgba(0,0,0,0.2);
+  z-index: 103; animation: toastIn 0.35s ease; display: flex; align-items: center; gap: 12px;
+  max-width: 90vw; text-align: center;
+}
+.difficulty-suggestion button {
+  background: #fff; color: #6C5CE7; border: none; padding: 6px 14px;
+  border-radius: 6px; font-weight: 700; cursor: pointer; font-size: 0.9rem; white-space: nowrap;
+}
+.difficulty-suggestion .dismiss-btn {
+  background: transparent; color: rgba(255,255,255,0.7); padding: 4px 8px; font-size: 1.2rem;
+}
+.difficulty-suggestion.fade-out { animation: toastOut 0.3s ease forwards; }
+
+/* ── Expanded Notation ── */
+.expanded-section { display: flex; flex-direction: column; gap: 0; width: 100%; }
+.expanded-toggle {
+  display: flex; align-items: center; justify-content: center; gap: 8px;
+  background: #F0E6FF; border: 2px solid #C9B3E8;
+  border-radius: 10px 10px 0 0; padding: 12px 16px; cursor: pointer;
+  font-size: 0.9rem; font-weight: 700; color: var(--color-text);
+  user-select: none; -webkit-user-select: none;
+}
+.expanded-toggle .arrow {
+  display: inline-block; transition: transform 0.25s ease; font-size: 0.7rem;
+}
+.expanded-section.collapsed .expanded-toggle { border-radius: 10px; }
+.expanded-section.collapsed .arrow { transform: rotate(-90deg); }
+.expanded-body {
+  overflow: hidden; transition: max-height 0.35s ease, opacity 0.25s ease;
+  max-height: 300px; opacity: 1; border: 2px solid #C9B3E8; border-top: none;
+  border-radius: 0 0 10px 10px; background: #fff; padding: 16px 20px;
+}
+.expanded-section.collapsed .expanded-body { max-height: 0; opacity: 0; padding: 0 20px; }
+.expanded-row {
+  font-size: 1.1rem; font-weight: 600; line-height: 1.8; color: var(--color-text);
+  font-family: 'Courier New', monospace;
+}
+.expanded-row .place-h { color: var(--color-flat); }
+.expanded-row .place-t { color: var(--color-rod); }
+.expanded-row .place-o { color: var(--color-unit); }
+
+/* ── Number Line Section (collapsible) ── */
+.numline-section { display: flex; flex-direction: column; gap: 0; width: 100%; }
+.numline-toggle {
+  display: flex; align-items: center; justify-content: center; gap: 8px;
+  background: #E8F4FD; border: 2px solid #B0D4F1;
+  border-radius: 10px 10px 0 0; padding: 12px 16px; cursor: pointer;
+  font-size: 0.9rem; font-weight: 700; color: var(--color-text);
+  user-select: none; -webkit-user-select: none;
+}
+.numline-toggle .arrow {
+  display: inline-block; transition: transform 0.25s ease; font-size: 0.7rem;
+}
+.numline-section.collapsed .numline-toggle { border-radius: 10px; }
+.numline-section.collapsed .arrow { transform: rotate(-90deg); }
+.numline-body {
+  overflow: hidden; transition: max-height 0.35s ease, opacity 0.25s ease;
+  max-height: 500px; opacity: 1; border: 2px solid #B0D4F1; border-top: none;
+  border-radius: 0 0 10px 10px; background: #fff; padding: 16px 12px;
+}
+.numline-section.collapsed .numline-body { max-height: 0; opacity: 0; padding: 0 12px; }
+.numline-svg { width: 100%; height: 120px; }
+.numline-svg text { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; }
+
 /* ── Mat Section (collapsible) ── */
 .mat-section { display: flex; flex-direction: column; gap: 0; width: 100%; }
 .mat-toggle {
@@ -563,6 +652,11 @@ body {
       </div>
     </div>
     <div class="entry-hint" id="entryHint">Type your own numbers or press New</div>
+    <div class="estimate-prompt" id="estimatePrompt">
+      <span>Estimate:</span>
+      <input type="text" id="estimateInput" inputmode="numeric" maxlength="4" autocomplete="off" placeholder="?">
+      <span class="estimate-result" id="estimateResult"></span>
+    </div>
     <div class="guide-prompt" id="guidePrompt" aria-live="polite">
       <span id="guideText"></span>
       <input type="text" id="guideInput" inputmode="numeric" autocomplete="off">
@@ -613,6 +707,24 @@ body {
     </div>
   </div>
 
+  <!-- Expanded Notation (collapsible) -->
+  <div class="expanded-section collapsed" id="expandedSection">
+    <div class="expanded-toggle" id="expandedToggle">
+      <span class="arrow">&#9660;</span> Expanded Notation
+    </div>
+    <div class="expanded-body" id="expandedBody"></div>
+  </div>
+
+  <!-- Number Line (collapsible) -->
+  <div class="numline-section collapsed" id="numlineSection">
+    <div class="numline-toggle" id="numlineToggle">
+      <span class="arrow">&#9660;</span> Number Line
+    </div>
+    <div class="numline-body">
+      <svg class="numline-svg" id="numlineSvg" viewBox="0 0 600 120"></svg>
+    </div>
+  </div>
+
 </div>
 
 <div class="feedback-overlay" id="feedbackOverlay" role="alert" aria-live="assertive"></div>
@@ -634,6 +746,10 @@ const state = {
   guide: 'ones', // null | 'ones' | 'tens' | 'hundreds' | 'done'
   guideEnabled: true, // whether guide mode is on
   solvedCount: 0,
+  numlineCollapsed: true,
+  expandedCollapsed: true,
+  streak: 0,
+  estimateShown: false,
 };
 
 function setState(u) { Object.assign(state, u); render(); }
@@ -927,6 +1043,108 @@ function render() {
       lockInputs(['ch','ct'], false);
     }
   }
+
+  // Expanded notation collapse state
+  document.getElementById('expandedSection').classList.toggle('collapsed', state.expandedCollapsed);
+  if (!state.expandedCollapsed && hasNumbers) renderExpandedNotation();
+
+  // Number line collapse state
+  document.getElementById('numlineSection').classList.toggle('collapsed', state.numlineCollapsed);
+  if (!state.numlineCollapsed && hasNumbers) renderNumberLine();
+}
+
+// ═══════════════════════════════════════════
+// Expanded Notation
+// ═══════════════════════════════════════════
+function expandedNotationStr(n) {
+  const d = digits(n);
+  const parts = [];
+  if (d.hundreds) parts.push('<span class="place-h">' + (d.hundreds * 100) + '</span>');
+  if (d.tens) parts.push('<span class="place-t">' + (d.tens * 10) + '</span>');
+  if (d.ones || parts.length === 0) parts.push('<span class="place-o">' + d.ones + '</span>');
+  return n + ' = ' + parts.join(' + ');
+}
+function renderExpandedNotation() {
+  const body = document.getElementById('expandedBody');
+  const result = state.num1 + state.num2;
+  body.innerHTML =
+    '<div class="expanded-row">' + expandedNotationStr(state.num1) + '</div>' +
+    '<div class="expanded-row">+ ' + expandedNotationStr(state.num2) + '</div>' +
+    '<div class="expanded-row" style="border-top:2px solid #ccc;margin-top:4px;padding-top:4px;">= ' + expandedNotationStr(result) + '</div>';
+}
+
+// ═══════════════════════════════════════════
+// Number Line
+// ═══════════════════════════════════════════
+function renderNumberLine() {
+  const svg = document.getElementById('numlineSvg');
+  svg.innerHTML = '';
+  const ns = 'http://www.w3.org/2000/svg';
+  const a = state.num1, b = state.num2, result = a + b;
+  const maxVal = result;
+  if (maxVal <= 0) return;
+
+  const pad = 50, lineY = 80, w = 600;
+  const usable = w - pad * 2;
+
+  // Determine tick points — show: 0, a, result (and optionally nice intermediate ticks)
+  const points = [0, a, result];
+  const unique = [...new Set(points)].sort((x, y) => x - y);
+
+  function x(val) { return pad + (val / maxVal) * usable; }
+
+  // Main line
+  const line = document.createElementNS(ns, 'line');
+  Object.entries({ x1: pad - 10, y1: lineY, x2: w - pad + 10, y2: lineY, stroke: '#999', 'stroke-width': 2 }).forEach(([k, v]) => line.setAttribute(k, v));
+  svg.appendChild(line);
+
+  // Tick marks & labels
+  unique.forEach(val => {
+    const tx = x(val);
+    const tick = document.createElementNS(ns, 'line');
+    Object.entries({ x1: tx, y1: lineY - 6, x2: tx, y2: lineY + 6, stroke: '#333', 'stroke-width': 2 }).forEach(([k, v]) => tick.setAttribute(k, v));
+    svg.appendChild(tick);
+    const label = document.createElementNS(ns, 'text');
+    Object.entries({ x: tx, y: lineY + 22, 'text-anchor': 'middle', fill: '#333', 'font-size': '13px', 'font-weight': '600' }).forEach(([k, v]) => label.setAttribute(k, v));
+    label.textContent = val;
+    svg.appendChild(label);
+  });
+
+  // Jump arc: from a, jump +b to result
+  if (b > 0) {
+    const x1 = x(a), x2 = x(result);
+    const midX = (x1 + x2) / 2;
+    const arcH = Math.min(45, Math.max(20, (x2 - x1) * 0.3));
+    const path = document.createElementNS(ns, 'path');
+    path.setAttribute('d', `M${x1},${lineY} Q${midX},${lineY - arcH} ${x2},${lineY}`);
+    path.setAttribute('fill', 'none');
+    path.setAttribute('stroke', '#4A90D9');
+    path.setAttribute('stroke-width', '2.5');
+    path.setAttribute('marker-end', 'url(#arrowhead)');
+    svg.appendChild(path);
+
+    // Jump label
+    const jumpLabel = document.createElementNS(ns, 'text');
+    Object.entries({ x: midX, y: lineY - arcH - 6, 'text-anchor': 'middle', fill: '#4A90D9', 'font-size': '14px', 'font-weight': '700' }).forEach(([k, v]) => jumpLabel.setAttribute(k, v));
+    jumpLabel.textContent = '+' + b;
+    svg.appendChild(jumpLabel);
+  }
+
+  // Dot on starting number
+  const dot = document.createElementNS(ns, 'circle');
+  Object.entries({ cx: x(a), cy: lineY, r: 5, fill: '#E8573A' }).forEach(([k, v]) => dot.setAttribute(k, v));
+  svg.appendChild(dot);
+
+  // Arrowhead marker
+  const defs = document.createElementNS(ns, 'defs');
+  const marker = document.createElementNS(ns, 'marker');
+  Object.entries({ id: 'arrowhead', markerWidth: 8, markerHeight: 6, refX: 8, refY: 3, orient: 'auto' }).forEach(([k, v]) => marker.setAttribute(k, v));
+  const poly = document.createElementNS(ns, 'polygon');
+  poly.setAttribute('points', '0 0, 8 3, 0 6');
+  poly.setAttribute('fill', '#4A90D9');
+  marker.appendChild(poly);
+  defs.appendChild(marker);
+  svg.insertBefore(defs, svg.firstChild);
 }
 
 // ═══════════════════════════════════════════
@@ -1122,8 +1340,8 @@ function checkAnswer() {
     if (userCH === expectedCH) G.ch.classList.add('correct');
     else G.ch.classList.add('incorrect');
   }
-  if(ok){ celebrate(); setState({answered:true}); }
-  else showHint();
+  if(ok){ state.streak = Math.max(state.streak, 0) + 1; celebrate(); setState({answered:true}); checkAdaptiveDifficulty(); }
+  else { state.streak = Math.min(state.streak, 0) - 1; showHint(); checkAdaptiveDifficulty(); }
 }
 
 // ═══════════════════════════════════════════
@@ -1137,6 +1355,37 @@ function celebrate() {
   ov.innerHTML='<div class="feedback-message">Great job!</div>';
   ov.classList.add('show');
   setTimeout(()=>{ov.classList.remove('show');ov.innerHTML='';clearConfetti();},3000);
+}
+function checkAdaptiveDifficulty() {
+  const levels = ['easy', 'medium', 'hard'];
+  const idx = levels.indexOf(state.difficulty);
+  let suggestion = null;
+  if (state.streak <= -3 && idx > 0) {
+    suggestion = { text: 'Finding it tough? Try ', level: levels[idx - 1] };
+  } else if (state.streak >= 5 && idx < 2) {
+    suggestion = { text: 'You\'re on a roll! Try ', level: levels[idx + 1] };
+  }
+  // Remove existing suggestion
+  document.querySelectorAll('.difficulty-suggestion').forEach(e => e.remove());
+  if (!suggestion) return;
+  const el = document.createElement('div');
+  el.className = 'difficulty-suggestion';
+  el.innerHTML = suggestion.text + '<button id="adaptBtn">' + suggestion.level.charAt(0).toUpperCase() + suggestion.level.slice(1) + '</button>' +
+    '<button class="dismiss-btn" id="adaptDismiss">\u00d7</button>';
+  document.body.appendChild(el);
+  document.getElementById('adaptBtn').addEventListener('click', () => {
+    state.difficulty = suggestion.level;
+    document.getElementById('difficultySelect').value = suggestion.level;
+    state.streak = 0;
+    el.remove();
+    newProblem();
+  });
+  document.getElementById('adaptDismiss').addEventListener('click', () => {
+    state.streak = 0;
+    el.classList.add('fade-out');
+    el.addEventListener('animationend', () => el.remove(), { once: true });
+  });
+  setTimeout(() => { if (el.parentNode) { el.classList.add('fade-out'); el.addEventListener('animationend', () => el.remove(), { once: true }); } }, 8000);
 }
 function showConfetti() {
   const colors=['#FF6B6B','#4ECDC4','#45B7D1','#96CEB4','#FFEAA7','#DDA0DD','#FF8C00','#7B68EE'];
@@ -1186,8 +1435,39 @@ function newProblem() {
   state.num1=a; state.num2=b;
   resetToInput(); setGaleraAddends();
   state.guide = state.guideEnabled ? 'ones' : null;
+  showEstimatePrompt();
   render();
-  if (state.guide) document.getElementById('guideInput').focus();
+  if (state.estimateShown) document.getElementById('estimateInput').focus();
+  else if (state.guide) document.getElementById('guideInput').focus();
+}
+function showEstimatePrompt() {
+  const el = document.getElementById('estimatePrompt');
+  const input = document.getElementById('estimateInput');
+  const result = document.getElementById('estimateResult');
+  input.value = ''; result.textContent = ''; result.className = 'estimate-result';
+  state.estimateShown = true;
+  el.classList.add('show');
+}
+function dismissEstimate() {
+  state.estimateShown = false;
+  document.getElementById('estimatePrompt').classList.remove('show');
+}
+function checkEstimate() {
+  const input = document.getElementById('estimateInput');
+  const result = document.getElementById('estimateResult');
+  const guess = parseInt(input.value);
+  if (isNaN(guess)) return;
+  const actual = state.num1 + state.num2;
+  const diff = Math.abs(guess - actual);
+  const threshold = Math.max(actual * 0.2, 10); // within 20% or 10
+  if (diff <= threshold) {
+    result.textContent = 'Close!';
+    result.className = 'estimate-result close';
+  } else {
+    result.textContent = 'Not quite!';
+    result.className = 'estimate-result far';
+  }
+  setTimeout(() => dismissEstimate(), 1500);
 }
 
 // ═══════════════════════════════════════════
@@ -1390,6 +1670,8 @@ document.getElementById('guideInput').addEventListener('input', function(){
   this.classList.remove('correct','incorrect');
   if (this.value) checkGuideStep();
 });
+document.getElementById('guideInput').addEventListener('focus', dismissEstimate);
+['rh','rt','ro'].forEach(k => G[k].addEventListener('focus', dismissEstimate));
 
 // ═══════════════════════════════════════════
 // Block counting
@@ -1408,6 +1690,12 @@ document.getElementById('matToggle').addEventListener('click', () => {
   const next = !state.matCollapsed;
   localStorage.setItem('matCollapsed', next);
   setState({ matCollapsed: next });
+});
+document.getElementById('numlineToggle').addEventListener('click', () => {
+  setState({ numlineCollapsed: !state.numlineCollapsed });
+});
+document.getElementById('expandedToggle').addEventListener('click', () => {
+  setState({ expandedCollapsed: !state.expandedCollapsed });
 });
 
 // ═══════════════════════════════════════════
@@ -1469,6 +1757,13 @@ function showUndoToast(label) {
 // ═══════════════════════════════════════════
 // Event Listeners
 // ═══════════════════════════════════════════
+document.getElementById('estimateInput').addEventListener('keydown', function(e) {
+  if (e.key === 'Enter') { e.preventDefault(); checkEstimate(); }
+  else if (e.key === 'Escape') { e.preventDefault(); dismissEstimate(); }
+});
+document.getElementById('estimateInput').addEventListener('input', function() {
+  this.value = this.value.replace(/[^0-9]/g, '');
+});
 document.getElementById('btnClear').addEventListener('click', () => {
   let commit = null;
   if (hasPartialWork()) commit = showUndoToast('Cleared.');
