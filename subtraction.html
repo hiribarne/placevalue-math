@@ -1242,9 +1242,9 @@ function checkAnswer() {
   const uh = G.rh.value, ut = G.rt.value, uo = G.ro.value;
   let ok = true;
   [['rh', uh, dd.hundreds],['rt', ut, dd.tens],['ro', uo, dd.ones]].forEach(([k,u,c]) => {
-    const uStr = String(u);
-    const cStr = String(c);
-    if (uStr === cStr) G[k].classList.add('correct');
+    const uNum = parseInt(u) || 0;
+    const cNum = parseInt(c) || 0;
+    if (uNum === cNum) G[k].classList.add('correct');
     else { G[k].classList.add('incorrect'); ok = false; }
   });
   if (ok) { celebrate(); setState({ answered: true }); }

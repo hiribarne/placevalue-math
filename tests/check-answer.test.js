@@ -103,17 +103,12 @@ describe('Subtraction — checkAnswer()', () => {
   });
 
   it('result of 0: empty cell matches expected', () => {
-    // 50 - 50 = 0 → digitDisplay gives '' for all positions
-    // Entering '' (empty) should match expected ''
     const win = setupAndCheck(50, 50, '', '', '');
     assert.ok($(win, 'g-r-o').classList.contains('correct'));
   });
 
   it('result of 0: student entering "0" is also accepted', () => {
-    // Known behavior: digitDisplay(digits(0)).ones = '' so '0' !== ''
-    // This tests the current behavior — '0' is marked incorrect
-    // TODO: Consider treating '0' as equivalent to '' in checkAnswer
     const win = setupAndCheck(50, 50, '', '', '0');
-    assert.ok($(win, 'g-r-o').classList.contains('incorrect'));
+    assert.ok($(win, 'g-r-o').classList.contains('correct'));
   });
 });
