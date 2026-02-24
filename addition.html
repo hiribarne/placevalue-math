@@ -1064,14 +1064,28 @@ async function regroupColumn(srcId, sel, destId, newType, updateFn, nextFn, narr
 // Check Answer
 // ═══════════════════════════════════════════
 function checkAnswer() {
-  ['rh','rt','ro'].forEach(k => G[k].classList.remove('correct','incorrect'));
+  ['rh','rt','ro','ch','ct'].forEach(k => G[k].classList.remove('correct','incorrect'));
   const sum=state.num1+state.num2, cd=digits(sum);
+  const steps=getAdditionSteps();
   const uh=parseInt(G.rh.value)||0, ut=parseInt(G.rt.value)||0, uo=parseInt(G.ro.value)||0;
   let ok=true;
   [['rh',uh,cd.hundreds],['rt',ut,cd.tens],['ro',uo,cd.ones]].forEach(([k,u,c])=>{
     if(u===c) G[k].classList.add('correct');
     else { G[k].classList.add('incorrect'); ok=false; }
   });
+  // Validate carries
+  const expectedCT = steps.ones.fullSum >= 10 ? 1 : 0;
+  const expectedCH = steps.tens.fullSum >= 10 ? 1 : 0;
+  const userCT = parseInt(G.ct.value) || 0;
+  const userCH = parseInt(G.ch.value) || 0;
+  if (expectedCT > 0 || G.ct.value !== '') {
+    if (userCT === expectedCT) G.ct.classList.add('correct');
+    else G.ct.classList.add('incorrect');
+  }
+  if (expectedCH > 0 || G.ch.value !== '') {
+    if (userCH === expectedCH) G.ch.classList.add('correct');
+    else G.ch.classList.add('incorrect');
+  }
   if(ok){ celebrate(); setState({answered:true}); }
   else showHint();
 }
@@ -1315,6 +1329,14 @@ addendCells.forEach(k => {
   G[k].addEventListener('input', function(){
     this.value=this.value.replace(/[^0-9]/g,'').slice(0,1);
     this.classList.remove('correct','incorrect');
+  });
+  G[k].addEventListener('keydown', function(e){
+    if (e.key === 'Enter') {
+      e.preventDefault();
+      const {num1,num2}=readGaleraAddends();
+      state.num1=num1; state.num2=num2;
+      if (state.num1>0 && state.num2>0) checkAnswer();
+    }
   });
 });
 // Carry inputs — editable, filter to digits

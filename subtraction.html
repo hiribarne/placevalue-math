@@ -1548,6 +1548,14 @@ addendCells.forEach(k => {
     this.value = this.value.replace(/[^0-9]/g, '').slice(0, 1);
     this.classList.remove('correct', 'incorrect');
   });
+  G[k].addEventListener('keydown', function(e) {
+    if (e.key === 'Enter') {
+      e.preventDefault();
+      const {num1,num2}=readGaleraValues();
+      state.num1=num1; state.num2=num2;
+      if (state.num1>0 && state.num2>0) checkAnswer();
+    }
+  });
 });
 // Borrow inputs — editable, filter to digits
 ['ch','ct','co'].forEach(k => {

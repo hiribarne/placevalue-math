@@ -1,0 +1,12 @@
+{
+  "name": "placevalue-math",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Interactive web tool for learning addition and subtraction with base-10 blocks and the column method.",
+  "scripts": {
+    "test": "node --test tests/*.test.js"
+  },
+  "devDependencies": {
+    "jsdom": "^28.1.0"
+  }
+}
