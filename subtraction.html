@@ -71,6 +71,10 @@ body {
   font-size: 0.95rem; padding: 8px 14px; border-radius: 6px; min-height: 44px;
 }
 .btn-home:active { transform: scale(0.96); }
+.problem-counter {
+  font-size: 0.85rem; opacity: 0.8; font-weight: 600;
+  margin-left: auto; white-space: nowrap;
+}
 
 /* ── Main Layout ── */
 .main {
@@ -403,7 +407,8 @@ body {
   position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%);
   background: #FFF3CD; color: #856404; padding: 14px 28px; border-radius: 10px;
   font-size: 1.1rem; font-weight: 600; box-shadow: 0 4px 16px rgba(0,0,0,0.18);
-  z-index: 100; animation: toastIn 0.35s ease; pointer-events: none; white-space: nowrap;
+  z-index: 100; animation: toastIn 0.35s ease; pointer-events: none;
+  white-space: normal; max-width: 90vw; text-align: center;
 }
 @keyframes toastIn {
   from { transform: translateX(-50%) translateY(20px); opacity: 0; }
@@ -520,6 +525,7 @@ body {
   </select>
   <button class="btn-new" id="btnNew">New Problem</button>
   <button class="btn-guide header-btn active" id="btnGuide">Guide: On</button>
+  <span class="problem-counter" id="problemCounter">Solved: 0</span>
 </div>
 
 <div class="main">
@@ -558,12 +564,12 @@ body {
         <input class="galera-cell" id="g-r-o" maxlength="1" inputmode="numeric" aria-label="Result ones">
       </div>
     </div>
-    <div class="guide-prompt" id="guidePrompt">
+    <div class="guide-prompt" id="guidePrompt" aria-live="polite">
       <span id="guideText"></span>
       <input type="text" id="guideInput" inputmode="numeric" autocomplete="off">
       <button id="guideBorrowBtn" class="guide-borrow-btn">Borrow</button>
     </div>
-    <div class="narration-bar" id="narrationBar">
+    <div class="narration-bar" id="narrationBar" aria-live="polite">
       <div class="narration-icon" id="narrationIcon">&#x1F9D1;&#x200D;&#x1F3EB;</div>
       <div class="narration-text" id="narrationText"></div>
     </div>
@@ -584,11 +590,11 @@ body {
         <div class="mat-header">Tens<small>(10)</small></div>
         <div class="mat-header">Ones<small>(1)</small></div>
 
-        <div class="mat-cell hundreds-col row-minuend" id="mat-a1-h"><span class="mat-row-label">Minuend</span></div>
+        <div class="mat-cell hundreds-col row-minuend" id="mat-a1-h"><span class="mat-row-label">First Number</span></div>
         <div class="mat-cell tens-col row-minuend" id="mat-a1-t"></div>
         <div class="mat-cell ones-col row-minuend" id="mat-a1-o"></div>
 
-        <div class="mat-cell hundreds-col row-subtrahend" id="mat-a2-h"><span class="mat-row-label">Subtrahend</span></div>
+        <div class="mat-cell hundreds-col row-subtrahend" id="mat-a2-h"><span class="mat-row-label">Second Number</span></div>
         <div class="mat-cell tens-col row-subtrahend" id="mat-a2-t"></div>
         <div class="mat-cell ones-col row-subtrahend" id="mat-a2-o"></div>
 
@@ -611,7 +617,7 @@ body {
 
 </div>
 
-<div class="feedback-overlay" id="feedbackOverlay"></div>
+<div class="feedback-overlay" id="feedbackOverlay" role="alert" aria-live="assertive"></div>
 
 <script>
 // ═══════════════════════════════════════════
@@ -626,12 +632,13 @@ const state = {
   borrows: { tens: 0, hundreds: 0 },
   animating: false,
   answered: false,
-  matCollapsed: true,
+  matCollapsed: localStorage.getItem('matCollapsed') !== null ? localStorage.getItem('matCollapsed') === 'true' : false,
   // Modified minuend digits after borrowing
   minuendMod: { ones: 0, tens: 0, hundreds: 0 },
   guide: 'ones', // null | 'ones' | 'tens' | 'hundreds' | 'done'
   guideEnabled: true, // whether guide mode is on
   guideBorrowsPending: null, // borrows array waiting for student to click Borrow
+  solvedCount: 0,
 };
 
 function setState(u) { Object.assign(state, u); render(); }
@@ -1255,6 +1262,8 @@ function checkAnswer() {
 // Celebration / Hint / Audio
 // ═══════════════════════════════════════════
 function celebrate() {
+  state.solvedCount++;
+  document.getElementById('problemCounter').textContent = 'Solved: ' + state.solvedCount;
   showConfetti();
   const ov = document.getElementById('feedbackOverlay');
   ov.innerHTML = '<div class="feedback-message">Great job!</div>';
@@ -1591,7 +1600,9 @@ document.getElementById('theMat').addEventListener('click', (e) => {
 // Collapse toggle
 // ═══════════════════════════════════════════
 document.getElementById('matToggle').addEventListener('click', () => {
-  setState({ matCollapsed: !state.matCollapsed });
+  const next = !state.matCollapsed;
+  localStorage.setItem('matCollapsed', next);
+  setState({ matCollapsed: next });
 });
 
 // ═══════════════════════════════════════════

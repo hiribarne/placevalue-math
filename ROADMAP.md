@@ -23,11 +23,11 @@ Each stage builds on the previous one. Tests are written alongside each feature.
 
 ---
 
-## Stage 1 — Code Quality & Core UX
+## Stage 1 — Code Quality & Core UX ✓
 
 **Goal:** Reduce duplication, improve correctness feedback, speed up workflows.
 
-- [ ] **Extract shared CSS/JS into common files**
+- [ ] **Extract shared CSS/JS into common files** *(deferred — large refactor, lower priority)*
   - Create `shared.css` with common styles (header, galera, mat, feedback, confetti, etc.)
   - Create `shared.js` with common functions (digits, digitDisplay, wait, blocks, confetti, hints, calculator entry)
   - Reduces maintenance burden and keeps addition/subtraction in sync
@@ -47,34 +47,32 @@ Each stage builds on the previous one. Tests are written alongside each feature.
   - Updated `.github/workflows/pages.yml` to only deploy HTML files and LICENSE
   - Excludes tests/, node_modules/, ROADMAP.md, and dev files from deployed site
 
+- [x] **Fix subtraction zero-result bug**
+  - Entering "0" for a zero result (e.g. 50 − 50) was marked incorrect
+  - Changed string comparison to numeric (`parseInt||0`)
+
 ---
 
-## Stage 2 — Accessibility & Polish
+## Stage 2 — Accessibility & Polish ✓
 
 **Goal:** Make the tool more approachable and accessible.
 
-- [ ] **Kid-friendly mat labels**
-  - Replace "Minuend" / "Subtrahend" / "Addend 1" / "Addend 2" with simpler labels
-  - Options: "Top Number" / "Bottom Number", or use the actual numbers, or just "First" / "Second"
+- [x] **Kid-friendly mat labels**
+  - Replaced "Minuend"/"Subtrahend"/"Addend 1"/"Addend 2" with "First Number"/"Second Number"
 
-- [ ] **Start mat expanded on first visit**
-  - Use localStorage to remember collapse preference
-  - Default to expanded on first visit so new users discover the visual blocks
-  - Collapsed state persists across problems but resets on page reload (or remember via localStorage)
+- [x] **Start mat expanded on first visit**
+  - Defaults to expanded; localStorage persists collapse preference across visits
 
-- [ ] **Problem counter / session tracker**
-  - Show "Problems solved: 3" in the header or below the galera
-  - Motivates continued practice and gives parents/teachers a quick metric
-  - Reset on page reload
+- [x] **Problem counter / session tracker**
+  - Shows "Solved: N" in the header, increments on each correct answer
+  - Resets on page reload
 
-- [ ] **Hint toast nowrap fix**
-  - Hint toast text currently can overflow on narrow screens
-  - Add `white-space: normal; max-width: 90vw;` to `.hint-toast`
+- [x] **Hint toast nowrap fix**
+  - Changed to `white-space: normal; max-width: 90vw;` so text wraps on narrow screens
 
-- [ ] **ARIA live regions**
-  - Add `aria-live="polite"` to narration bar, guide prompt, and feedback overlay
-  - Ensures screen readers announce guide prompts and results
-  - Add `role="alert"` for error feedback (incorrect answers)
+- [x] **ARIA live regions**
+  - `aria-live="polite"` on narration bar and guide prompt
+  - `role="alert" aria-live="assertive"` on feedback overlay
 
 ---
 
@@ -132,19 +130,16 @@ Each stage builds on the previous one. Tests are written alongside each feature.
 
 Tests live in `tests/` directory and run via Node.js with jsdom.
 
-### Existing Feature Tests
-- `tests/test-helpers.js` — digits(), digitDisplay(), wait(), randInt()
-- `tests/test-addition-steps.js` — getAdditionSteps() for various cases (no carry, one carry, two carries)
-- `tests/test-subtraction-steps.js` — getSubtractionSteps() for various cases (no borrow, one borrow, chain borrow)
-- `tests/test-calculator-entry.js` — pushDigit(), popDigit(), shiftDigitLeft(), shiftDigitRight()
-- `tests/test-problem-generator.js` — generateProblem() respects difficulty constraints
-- `tests/test-check-answer.js` — checkAnswer() validates result digits correctly
-
-### New Feature Tests (added with each stage)
-- Stage 1: carry/borrow validation, Enter-to-check
-- Stage 2: localStorage persistence, ARIA attributes present
-- Stage 3: Service worker registration, undo mechanism
-- Stage 4: expanded notation formatting, adaptive difficulty logic
+### Test Files (110 tests)
+- `tests/helpers.test.js` — digits(), digitDisplay(), randInt() (17 tests)
+- `tests/addition-steps.test.js` — getAdditionSteps(), needsCarry(), carryCount() (14 tests)
+- `tests/subtraction-steps.test.js` — getSubtractionSteps(), needsBorrowCheck(), borrowCount(), determineBorrowPhase() (20 tests)
+- `tests/calculator-entry.test.js` — pushDigit(), popDigit(), shiftDigitLeft(), shiftDigitRight() (13 tests)
+- `tests/problem-generator.test.js` — generateProblem() difficulty constraints (6 tests)
+- `tests/check-answer.test.js` — checkAnswer() for both operations (11 tests)
+- `tests/guide-mode.test.js` — guide prompts, borrow pending state, input validation (8 tests)
+- `tests/stage1-improvements.test.js` — Enter-to-check, carry validation (7 tests)
+- `tests/stage2-improvements.test.js` — labels, mat expand, counter, hint fix, ARIA (16 tests)
 
 ---
 
